@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我國能源政策 v35.0 - 數據極大化版</title>
+    <!-- 
+      /* --- SYSTEM ARCHITECTURE: v35.0 (Extreme Data Scaling) --- */
+      1. 數據極大化：針對達成率下方的實績數字進行極限放大 (text-5xl 至 text-7xl)。
+      2. 標籤放大：提升標籤文字大小至 text-base，並加強字重。
+      3. 視覺一致性：維持離岸風電的正確名稱，並確保全網頁字體維持易讀的大尺寸。
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Inter:wght@400;700;900&display=swap');
+        
+        :root {
+            --brand-primary: #4f46e5;
+            --brand-indigo: #4338ca;
+            --brand-emerald: #10b981;
+            --bg-main: #f8fafc;
+        }
+
+        body { 
+            font-family: 'Inter', 'Noto Sans TC', sans-serif; 
+            background-color: var(--bg-main); 
+            color: #1e293b;
+            margin: 0;
+            overflow: hidden;
+            font-size: 18px; 
+        }
+
+        .main-scroll {
+            height: 100vh;
+            overflow-y: auto;
+            padding-bottom: 4rem;
+            scroll-behavior: smooth;
+        }
+
+        .glass-card {
+            background: #ffffff;
+            border-radius: 1rem;
+            border: 1px solid rgba(226, 232, 240, 0.7);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 20px 30px -5px rgba(79, 70, 229, 0.08);
+            border-color: var(--brand-primary);
+        }
+
+        .policy-card-item {
+            display: flex;
+            align-items: center;
+            padding: 1.25rem 2rem;
+            background: #ffffff;
+            border-radius: 0.75rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #f1f5f9;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .policy-card-item:hover {
+            border-color: var(--brand-primary);
+            background: #fafafa;
+            transform: translateX(5px);
+        }
+
+        .year-indicator {
+            font-weight: 900;
+            font-size: 0.85rem;
+            color: var(--brand-indigo);
+            background: #eef2ff;
+            padding: 0.3rem 0.7rem;
+            border-radius: 0.4rem;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: #ffffff;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-scroll::-webkit-scrollbar { width: 5px; }
+        .main-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div id="loader">
+        <div class="flex flex-col items-center gap-3">
+            <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm font-black text-slate-400 tracking-widest uppercase">Scaling Strategic Data...</p>
+        </div>
+    </div>
+
+    <div class="main-scroll p-6 md:p-10">
+        <div class="max-w-[1500px] mx-auto space-y-8">
+            
+            <!-- 頂部標題 -->
+            <header class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6">
+                <div class="space-y-3">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 rounded-full mb-1">
+                        <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+                        <span class="text-indigo-600 font-black text-[11px] uppercase tracking-[0.1em]">Strategy Portal</span>
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 leading-tight">我國能源政策</h2>
+                    <p class="text-slate-500 font-medium text-lg md:text-xl">數據驅動，實時監測能源轉型關鍵指標與政策路徑。</p>
+                </div>
+                <div class="bg-emerald-500 text-white px-4 py-2 rounded-xl shadow-md">
+                    <p class="text-[10px] font-black uppercase opacity-80 leading-none mb-1">Last Update</p>
+                    <p class="text-lg font-black italic">114年10月</p>
+                </div>
+            </header>
+
+            <!-- 核心圖表看板 -->
+            <section class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                
+                <!-- 圖表 1：短期能源轉型政策及達成情形 -->
+                <div class="glass-card p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="space-y-1">
+                            <h3 class="font-black text-slate-800 text-2xl">短期能源轉型政策及達成情形</h3>
+                            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Electricity Structure (%)</p>
+                        </div>
+                        <i data-lucide="bar-chart-3" class="text-indigo-200 w-6 h-6"></i>
+                    </div>
+                    <div id="chart-main-structure"></div>
+                </div>
+
+                <!-- 圖表 2：2025能源轉型政策目標達成率 -->
+                <div class="glass-card p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="space-y-1">
+                            <h3 class="font-black text-slate-800 text-2xl">2025能源轉型政策目標達成率</h3>
+                            <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">KPI Achievement (%)</p>
+                        </div>
+                        <i data-lucide="target" class="text-emerald-200 w-6 h-6"></i>
+                    </div>
+                    <div id="chart-gap-analysis"></div>
+                    
+                    <!-- 底部數值標註：根據需求極大化 -->
+                    <div class="mt-8 pt-8 border-t border-slate-50 flex justify-between px-2">
+                        <div class="text-center group flex-1">
+                            <p class="text-base font-black text-slate-400 uppercase mb-2 group-hover:text-indigo-600 transition-colors">太陽光電</p>
+                            <p class="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter">15.18 <span class="text-xl text-slate-300 font-bold ml-1">GW</span></p>
+                        </div>
+                        <div class="text-center group flex-1 border-x border-slate-100">
+                            <p class="text-base font-black text-slate-400 uppercase mb-2 group-hover:text-indigo-600 transition-colors">離岸風電</p>
+                            <p class="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter">3.35 <span class="text-xl text-slate-300 font-bold ml-1">GW</span></p>
+                        </div>
+                        <div class="text-center group flex-1">
+                            <p class="text-base font-black text-slate-400 uppercase mb-2 group-hover:text-indigo-600 transition-colors">地熱發電</p>
+                            <p class="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter">7.49 <span class="text-xl text-slate-300 font-bold ml-1">MW</span></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 政策資源導覽區 -->
+            <section class="max-w-[1300px] mx-auto space-y-6">
+                <div class="flex items-center gap-4">
+                    <h3 class="text-2xl font-black text-slate-800 flex items-center gap-3">
+                        <i data-lucide="file-text" class="text-indigo-600 w-6 h-6"></i> 政策文件資源清單
+                    </h3>
+                    <div class="flex-1 h-[1px] bg-slate-200"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+                    <a href="https://ws.ndc.gov.tw/Download.ashx?u=LzAwMS9hZG1pbmlzdHJhdG9yLzEwL3JlbGZpbGUvMC8xNTk5Mi85NzA1NTBhMi0wMWY0LTRlYmItOTAyMy1lMDA3YzE4MWU2MDIucGRm&n=MjAyMuW5tDPmnIgzMOaXpeWFrOW4g%2b%2b8muiHuueBozIwNTDmt6jpm7bmjpLmlL7ot6%2flvpHlj4rnrZbnlaXnuL3oqqrmmI4ucGRm&icon=.pdf" 
+                       target="_blank" class="policy-card-item group">
+                        <span class="year-indicator">2022</span>
+                        <p class="ml-4 font-bold text-slate-700 group-hover:text-indigo-600 text-lg flex-1">2050 淨零排放路徑藍圖</p>
+                        <i data-lucide="external-link" class="w-5 h-5 text-slate-300"></i>
+                    </a>
+
+                    <a href="https://www.ndc.gov.tw/Content_List.aspx?n=733396F648BE2845" 
+                       target="_blank" class="policy-card-item group">
+                        <span class="year-indicator">2022</span>
+                        <p class="ml-4 font-bold text-slate-700 group-hover:text-indigo-600 text-lg flex-1">12 項關鍵戰略行動計畫</p>
+                        <i data-lucide="external-link" class="w-5 h-5 text-slate-300"></i>
+                    </a>
+
+                    <a href="https://ws.ndc.gov.tw/Download.ashx?u=LzAwMS9hZG1pbmlzdHJhdG9yLzEwL3JlbGZpbGUvMC8xNTk5NC9iMzg3MDdkZS1lODYzLTQzNGUtODUxNS03YzNkYjBiNzRmMmEucGRm&n=5YWt5aSn6YOo6ZaA5rib56Kz6KGM5YuV6KiI55WrLnBkZg%3d%3d&icon=.pdf" 
+                       target="_blank" class="policy-card-item group">
+                        <span class="year-indicator">2023</span>
+                        <p class="ml-4 font-bold text-slate-700 group-hover:text-indigo-600 text-lg flex-1">20 項淨零旗艦計畫重點</p>
+                        <i data-lucide="external-link" class="w-5 h-5 text-slate-300"></i>
+                    </a>
+
+                    <a href="https://ws.ndc.gov.tw/Download.ashx?u=LzAwMS9hZG1pbmlzdHJhdG9yLzEwL3JlbGZpbGUvMC8xNTk5Mi9hMDliYWQ0Ni05MWZlLTQ5ZmEtYWFiMC1iZGFmNmE5ZDg5YWEucGRm&n=6Ie654Gj57i96auU5rib56Kz6KGM5YuV6KiI55WrLnBkZg%3d%3d&icon=.pdf" 
+                       target="_blank" class="policy-card-item group">
+                        <span class="year-indicator">2024</span>
+                        <p class="ml-4 font-bold text-slate-700 group-hover:text-indigo-600 text-lg flex-1">國家總體減碳策略手冊</p>
+                        <i data-lucide="external-link" class="w-5 h-5 text-slate-300"></i>
+                    </a>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        function initPolicyStation() {
+            lucide.createIcons();
+
+            // 1. 發電結構圖
+            const structOptions = {
+                series: [
+                    { name: '2016 基準', data: [4.8, 32.4, 45.4, 12.0] },
+                    { name: '2024 現況', data: [11.6, 42.4, 39.3, 6.7] },
+                    { name: '2026 目標', data: [20.0, 50.0, 30.0, 0.0] }
+                ],
+                chart: { type: 'bar', height: 320, toolbar: { show: false }, fontFamily: 'Inter, Noto Sans TC' },
+                colors: ['#6366f1', '#4338ca', '#10b981'], 
+                plotOptions: { bar: { columnWidth: '55%', borderRadius: 6, dataLabels: { position: 'top' } } },
+                dataLabels: { 
+                    enabled: true, 
+                    offsetY: -25,
+                    style: { fontSize: '13px', fontWeight: '900', colors: ['#475569'] }, 
+                    formatter: (v) => v + '%',
+                    background: { enabled: true, foreColor: '#fff', borderRadius: 4, padding: 5, opacity: 0.95 }
+                },
+                xaxis: { 
+                    categories: ['展綠 (再生)', '增氣 (燃氣)', '減煤 (燃煤)', '非核 (核能)'], 
+                    axisBorder: { show: false },
+                    labels: { style: { fontWeight: 900, colors: '#64748b', fontSize: '13px' } }
+                },
+                yaxis: { show: false },
+                legend: { position: 'bottom', fontWeight: 700, fontSize: '13px' },
+                grid: { borderColor: '#f8fafc', strokeDashArray: 4 }
+            };
+
+            // 2. 達成率圖表
+            const gapOptions = {
+                series: [{ name: '目標達成率', data: [75.9, 59.8, 37.4] }],
+                chart: { type: 'bar', height: 260, toolbar: { show: false }, fontFamily: 'Inter, Noto Sans TC' },
+                colors: ['#4f46e5'],
+                plotOptions: { 
+                    bar: { 
+                        horizontal: true, 
+                        barHeight: '45%', 
+                        borderRadius: 8, 
+                        dataLabels: { position: 'top' } 
+                    } 
+                },
+                xaxis: { 
+                    max: 100, 
+                    categories: ['太陽光電', '離岸風電', '地熱發電'], 
+                    labels: { style: { fontWeight: 900, colors: '#64748b', fontSize: '13px' }, formatter: (v) => v + '%' } 
+                },
+                annotations: {
+                    xaxis: [{
+                        x: 100, borderColor: '#f43f5e', strokeDashArray: 4, width: 2,
+                        label: { 
+                            style: { color: '#fff', background: '#f43f5e', fontWeight: 900, padding: { left: 8, right: 8, top: 4, bottom: 4 } }, 
+                            text: 'TARGET' 
+                        }
+                    }]
+                },
+                dataLabels: { 
+                    enabled: true, 
+                    offsetX: 15, 
+                    textAnchor: 'start', 
+                    style: { fontSize: '16px', fontWeight: '900', colors: ['#1e293b'] }, 
+                    formatter: (v) => v + '%' 
+                },
+                grid: { 
+                    xaxis: { lines: { show: true } }, 
+                    padding: { right: 50 } 
+                }
+            };
+
+            new ApexCharts(document.querySelector("#chart-main-structure"), structOptions).render();
+            new ApexCharts(document.querySelector("#chart-gap-analysis"), gapOptions).render();
+
+            setTimeout(() => {
+                const loader = document.getElementById('loader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 500);
+                }
+            }, 300);
+        }
+
+        document.addEventListener("DOMContentLoaded", initPolicyStation);
+    </script>
+</body>
+</html>
