@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國家能源全方位分析系統 - v21.2 Portal</title>
+    <title>國家能源全方位分析系統 - v21.3 Portal</title>
     <!-- 
-      /* --- SYSTEM ARCHITECTURE: v21.2 (Path Realignment) --- */
-      1. 修正：配合檔案改名 (portal -> index, index -> overview)，更新導航 URL 映射。
-      2. 邏輯：主入口為 index.html，右側 iframe 載入內容頁面如 overview.html。
-      3. 標籤：維持 v21 系列的雲端整合架構與 UI 風格。
+      /* --- SYSTEM ARCHITECTURE: v21.3 (Relative Path & Recovery) --- */
+      1. 修正：將 URL 全數改為「相對路徑」(./)，解決 GitHub Pages 檔案重新命名後的載入錯誤。
+      2. 備援：在導航項旁新增「外部跳轉」圖示，避免 iframe 被瀏覽器安全性原則阻擋時無法觀看。
+      3. 邏輯：預設載入 `./overview.html`。請確保 GitHub 上原 index.html 已更名為 overview.html。
+      4. 優化：強化頁面切換時的過渡動畫與 Loading 狀態提示。
     -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -26,23 +27,30 @@
         .sidebar { 
             background: #ffffff; 
             border-right: 1px solid #e2e8f0; 
-            width: 280px; 
+            width: 290px; 
             box-shadow: 10px 0 30px rgba(0,0,0,0.02);
             z-index: 50;
         }
 
+        .nav-item-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+        }
+
         .nav-link { 
+            flex: 1;
             display: flex; 
             align-items: center; 
             gap: 0.8rem; 
-            padding: 1rem 1.25rem; 
+            padding: 0.9rem 1.25rem; 
             border-radius: 0.85rem; 
             color: #64748b; 
             font-weight: 700; 
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             text-decoration: none;
-            margin-bottom: 0.25rem;
         }
 
         .nav-link:hover { background-color: #f1f5f9; color: #1e293b; }
@@ -56,6 +64,13 @@
             border-bottom-left-radius: 0;
         }
 
+        .external-link {
+            padding: 0.5rem;
+            color: #cbd5e1;
+            transition: color 0.2s;
+        }
+        .external-link:hover { color: #2563eb; }
+
         .content-container { 
             flex: 1; 
             height: 100vh; 
@@ -68,6 +83,7 @@
             height: 100%;
             border: none;
             display: block;
+            background: white;
         }
 
         #page-loader {
@@ -79,12 +95,12 @@
             align-items: center;
             justify-content: center;
             z-index: 40;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.4s ease;
         }
 
         .loader-spinner {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border: 4px solid #e2e8f0;
             border-top-color: #2563eb;
             border-radius: 50%;
@@ -96,7 +112,7 @@
 </head>
 <body class="flex">
 
-    <!-- 全系統唯一的側邊導航 -->
+    <!-- 統一導航側邊欄 -->
     <aside class="sidebar flex flex-col p-6 h-screen sticky top-0">
         <div class="flex items-center gap-3 mb-10">
             <div class="bg-blue-600 p-2.5 rounded-2xl text-white shadow-lg">
@@ -104,83 +120,106 @@
             </div>
             <div>
                 <h1 class="font-black text-lg leading-tight tracking-tight text-slate-800">能源分析主控台</h1>
-                <span class="text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase font-black text-[9px]">v21.2 Portal</span>
+                <span class="text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase font-black text-[9px] tracking-widest">v21.3 Cloud</span>
             </div>
         </div>
         
         <nav id="master-nav" class="flex-1 space-y-1">
-            <!-- 導航項目 -->
+            <!-- 項目由 JS 注入 -->
         </nav>
 
         <div class="pt-6 border-t border-slate-100 mt-auto">
-            <div class="bg-slate-50 p-4 rounded-xl mb-4 text-center">
-                <p class="text-[10px] font-black text-emerald-600 flex items-center justify-center gap-1.5 uppercase">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Cloud Connected
+            <div class="bg-blue-50/50 p-4 rounded-xl mb-4 border border-blue-100">
+                <p class="text-[10px] font-black text-blue-600 flex items-center justify-center gap-1.5 uppercase">
+                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                    Resource Synchronized
                 </p>
             </div>
             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed text-center">
-                Designed by Dr. JASW<br/>© 2025 National Analytics
+                Designed by Dr. JASW<br/>© 2025 Master Shell
             </p>
         </div>
     </aside>
 
+    <!-- 右側內容視窗 -->
     <div class="content-container">
+        <!-- 讀取遮罩 -->
         <div id="page-loader">
             <div class="loader-spinner mb-4"></div>
-            <p class="text-xs font-bold text-slate-400 tracking-widest uppercase">Syncing Cloud Resources...</p>
+            <p class="text-xs font-black text-slate-400 tracking-[0.2em] uppercase animate-pulse">Fetching Module Data...</p>
         </div>
+        <!-- 內容載入區 -->
         <iframe id="content-frame" name="content-frame" src=""></iframe>
     </div>
 
     <script>
         /* ============================================================
-           1. 集中化導航配置 - 已修正 URL 映射
+           1. 集中化導航配置 - 使用相對路徑避免跨網域衝突
            ============================================================ */
         const NAVIGATION_CONFIG = [
-            // 這裡將 URL 改為指向 overview.html
-            { id: 'overview', label: '總體能源概況', icon: 'layout-dashboard', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/overview.html' },
-            { id: 'key_metrics', label: '關鍵發展指標', icon: 'target', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/key_metrics.html' },
-            { id: 'demand', label: '能源需求分析', icon: 'activity', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/demand_station.html' },
-            { id: 'renewable', label: '再生能源分析', icon: 'leaf', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/renewable_station.html' },
-            { id: 'solar', label: '太陽光電專區', icon: 'sun', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/solar_station.html' }
+            { id: 'overview', label: '總體能源概況', icon: 'layout-dashboard', url: './overview.html' },
+            { id: 'key_metrics', label: '關鍵發展指標', icon: 'target', url: './key_metrics.html' },
+            { id: 'demand', label: '能源需求分析', icon: 'activity', url: './demand_station.html' },
+            { id: 'renewable', label: '再生能源分析', icon: 'leaf', url: './renewable_station.html' },
+            { id: 'solar', label: '太陽光電專區', icon: 'sun', url: './solar_station.html' }
         ];
 
         const frame = document.getElementById('content-frame');
         const loader = document.getElementById('page-loader');
         let currentActive = 'overview';
 
+        /* ============================================================
+           2. 核心控制邏輯
+           ============================================================ */
+
         function switchPage(id) {
             const page = NAVIGATION_CONFIG.find(p => p.id === id);
             if (!page) return;
+
             currentActive = id;
+            
+            // 啟動讀取動畫
             loader.style.opacity = '1';
             loader.style.pointerEvents = 'auto';
+
+            // 修改 iframe 來源
             frame.src = page.url;
+
+            // 重新渲染導航樣式
             renderNav();
         }
 
         function renderNav() {
             const nav = document.getElementById('master-nav');
             nav.innerHTML = NAVIGATION_CONFIG.map(item => `
-                <div class="nav-link ${currentActive === item.id ? 'active' : ''}" 
-                     onclick="switchPage('${item.id}')">
-                    <i data-lucide="${item.icon}" class="w-5 h-5"></i>
-                    <span>${item.label}</span>
+                <div class="nav-item-container">
+                    <div class="nav-link ${currentActive === item.id ? 'active' : ''}" 
+                         onclick="switchPage('${item.id}')">
+                        <i data-lucide="${item.icon}" class="w-5 h-5"></i>
+                        <span>${item.label}</span>
+                    </div>
+                    <a href="${item.url}" target="_blank" class="external-link" title="在新分頁開啟">
+                        <i data-lucide="external-link" class="w-4 h-4"></i>
+                    </a>
                 </div>
             `).join('');
             lucide.createIcons();
         }
 
+        /* ============================================================
+           3. 監聽與初始化
+           ============================================================ */
+
+        // 當內容頁面載入完成後隱藏 Loader
         frame.addEventListener('load', () => {
             setTimeout(() => {
                 loader.style.opacity = '0';
                 loader.style.pointerEvents = 'none';
-            }, 300);
+            }, 400);
         });
 
         document.addEventListener("DOMContentLoaded", () => {
-            // 預設開啟 overview
+            // 預設啟動總體概況
             switchPage('overview');
         });
     </script>
