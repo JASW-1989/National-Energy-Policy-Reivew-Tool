@@ -22,6 +22,19 @@
         <header class="mb-8 text-center">
             <h1 class="text-3xl font-bold text-slate-900 tracking-tight">2050 能源轉型路徑推估工具</h1>
             <p class="text-slate-500 mt-2 text-sm md:text-base">數據基礎：2024年底實績 | 未來規劃：依據提供之電源供給規劃與能源政策方向</p>
+            
+            <!-- Data Management Buttons -->
+            <div class="mt-6 flex justify-center gap-3">
+                <button onclick="exportSettings()" class="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-700 transition-all shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    匯出設定
+                </button>
+                <button onclick="document.getElementById('importFile').click()" class="flex items-center gap-2 px-4 py-2 bg-white text-slate-800 border border-slate-200 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-all shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    匯入設定
+                </button>
+                <input type="file" id="importFile" accept=".json" onchange="importSettings(event)" class="hidden">
+            </div>
         </header>
 
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
@@ -73,96 +86,7 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-50 text-[13px]">
-                                <tr class="energy-row">
-                                    <td class="py-2 pr-2 font-semibold text-slate-700">燃氣發電 (LNG)</td>
-                                    <td><input type="number" value="66.58" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
-                                    <td class="px-1"><input type="number" value="24.99" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="31.18" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="33.77" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="35.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold text-blue-700"></td>
-                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
-                                </tr>
-                                <tr class="energy-row">
-                                    <td class="py-2 pr-2 font-semibold text-slate-700">燃煤發電 (Coal)</td>
-                                    <td><input type="number" value="66.82" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
-                                    <td class="px-1"><input type="number" value="18.00" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="12.00" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="5.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="0.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold text-blue-700"></td>
-                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
-                                </tr>
-                                <tr class="energy-row">
-                                    <td class="py-2 pr-2 font-semibold text-slate-700">太陽光電 (PV)</td>
-                                    <td><input type="number" value="13.54" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
-                                    <td class="px-1"><input type="number" value="18.50" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5 text-green-600"></td>
-                                    <td class="px-1"><input type="number" value="30.00" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5 text-green-600"></td>
-                                    <td class="px-1"><input type="number" value="50.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5 text-green-600"></td>
-                                    <td class="px-1"><input type="number" value="80.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold text-green-700 bg-green-50"></td>
-                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
-                                </tr>
-                                <tr class="energy-row">
-                                    <td class="py-2 pr-2 font-semibold text-slate-700">離岸風電</td>
-                                    <td><input type="number" value="38.97" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
-                                    <td class="px-1"><input type="number" value="5.60" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5 text-green-600"></td>
-                                    <td class="px-1"><input type="number" value="13.10" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5 text-green-600"></td>
-                                    <td class="px-1"><input type="number" value="20.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5 text-green-600"></td>
-                                    <td class="px-1"><input type="number" value="40.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold text-green-700 bg-green-50"></td>
-                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
-                                </tr>
-                                <tr class="energy-row">
-                                    <td class="py-2 pr-2 font-semibold text-slate-700">地熱 (Geothermal)</td>
-                                    <td><input type="number" value="43.78" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
-                                    <td class="px-1"><input type="number" value="0.50" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5 text-green-600"></td>
-                                    <td class="px-1"><input type="number" value="1.20" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5 text-green-600"></td>
-                                    <td class="px-1"><input type="number" value="2.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5 text-green-600"></td>
-                                    <td class="px-1"><input type="number" value="5.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold text-green-700 bg-green-50"></td>
-                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
-                                </tr>
-                                <tr class="energy-row">
-                                    <td class="py-2 pr-2 font-semibold text-slate-700">抽蓄水力</td>
-                                    <td><input type="number" value="13.61" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
-                                    <td class="px-1"><input type="number" value="2.60" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="2.60" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="3.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="4.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold"></td>
-                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
-                                </tr>
-                                <tr class="energy-row">
-                                    <td class="py-2 pr-2 font-semibold text-slate-700">儲能 (Storage)</td>
-                                    <td><input type="number" value="5.00" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
-                                    <td class="px-1"><input type="number" value="1.00" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5 text-indigo-600"></td>
-                                    <td class="px-1"><input type="number" value="3.00" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5 text-indigo-600"></td>
-                                    <td class="px-1"><input type="number" value="6.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5 text-indigo-600"></td>
-                                    <td class="px-1"><input type="number" value="15.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold text-indigo-700 bg-indigo-50"></td>
-                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
-                                </tr>
-                                <tr class="energy-row">
-                                    <td class="py-2 pr-2 font-semibold text-slate-700">核能</td>
-                                    <td><input type="number" value="90.74" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
-                                    <td class="px-1"><input type="number" value="0.00" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="0.00" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="0.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="0.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold"></td>
-                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
-                                </tr>
-                                <tr class="energy-row">
-                                    <td class="py-2 pr-2 font-semibold text-slate-700">慣常水力</td>
-                                    <td><input type="number" value="22.27" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
-                                    <td class="px-1"><input type="number" value="2.12" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="2.50" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="3.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="4.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold"></td>
-                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
-                                </tr>
-                                <tr class="energy-row">
-                                    <td class="py-2 pr-2 font-semibold text-slate-700">廢棄物/生質能</td>
-                                    <td><input type="number" value="63.95" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
-                                    <td class="px-1"><input type="number" value="0.70" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="1.20" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="2.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
-                                    <td class="px-1"><input type="number" value="5.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold"></td>
-                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
-                                </tr>
+                                <!-- Rows will be populated here -->
                             </tbody>
                         </table>
                     </div>
@@ -254,6 +178,20 @@
             2050: { labels: [], gens: [], total: 0, renewableTotal: 0 }
         };
 
+        // 預設能源資料
+        const defaultEnergies = [
+            { name: "燃氣發電 (LNG)", cf: 66.58, cap: { 2026: 24.99, 2030: 31.18, 2035: 33.77, 2050: 35.00 } },
+            { name: "燃煤發電 (Coal)", cf: 66.82, cap: { 2026: 18.00, 2030: 12.00, 2035: 5.00, 2050: 0.00 } },
+            { name: "太陽光電 (PV)", cf: 13.54, cap: { 2026: 18.50, 2030: 30.00, 2035: 50.00, 2050: 80.00 } },
+            { name: "離岸風電", cf: 38.97, cap: { 2026: 5.60, 2030: 13.10, 2035: 20.00, 2050: 40.00 } },
+            { name: "地熱 (Geothermal)", cf: 43.78, cap: { 2026: 0.50, 2030: 1.20, 2035: 2.00, 2050: 5.00 } },
+            { name: "抽蓄水力", cf: 13.61, cap: { 2026: 2.60, 2030: 2.60, 2035: 3.00, 2050: 4.00 } },
+            { name: "儲能 (Storage)", cf: 5.00, cap: { 2026: 1.00, 2030: 3.00, 2035: 6.00, 2050: 15.00 } },
+            { name: "核能", cf: 90.74, cap: { 2026: 0.00, 2030: 0.00, 2035: 0.00, 2050: 0.00 } },
+            { name: "慣常水力", cf: 22.27, cap: { 2026: 2.12, 2030: 2.50, 2035: 3.00, 2050: 4.00 } },
+            { name: "廢棄物/生質能", cf: 63.95, cap: { 2026: 0.70, 2030: 1.20, 2035: 2.00, 2050: 5.00 } }
+        ];
+
         function initCharts() {
             const ctxTrend = document.getElementById('trendChart').getContext('2d');
             trendChart = new Chart(ctxTrend, {
@@ -292,7 +230,7 @@
                     labels: [],
                     datasets: [{
                         data: [],
-                        backgroundColor: ['#3b82f6', '#64748b', '#fbbf24', '#06b6d4', '#10b981', '#6366f1', '#f43f5e', '#f59e0b', '#14b8a6', '#8b5cf6', '#14b8a6'],
+                        backgroundColor: ['#3b82f6', '#64748b', '#fbbf24', '#06b6d4', '#10b981', '#6366f1', '#f43f5e', '#f59e0b', '#14b8a6', '#8b5cf6', '#a855f7'],
                         borderWidth: 2, borderColor: '#ffffff', hoverOffset: 12
                     }]
                 },
@@ -347,8 +285,8 @@
             });
 
             rows.forEach(row => {
-                const nameTd = row.querySelector('td:first-child');
-                const name = nameTd ? nameTd.innerText : "未知";
+                const nameInput = row.querySelector('.energy-name');
+                const name = nameInput ? nameInput.value : "未知";
                 const cfInput = row.querySelector('.cf-input');
                 const cf = cfInput ? parseFloat(cfInput.value) || 0 : 0;
 
@@ -391,17 +329,24 @@
             document.getElementById('displayYearGen').innerText = data.total.toFixed(1);
         }
 
-        function addRow() {
+        function addRow(data = null) {
             const tbody = document.querySelector('#energyTable tbody');
             const newRow = document.createElement('tr');
             newRow.className = 'energy-row';
+            
+            const name = data ? data.name : "新能源";
+            const cf = data ? data.cf : 30.00;
+            const caps = data ? data.cap : { 2026: 1.00, 2030: 2.00, 2035: 3.00, 2050: 5.00 };
+
             newRow.innerHTML = `
-                <td class="py-2 pr-2 font-semibold text-slate-700"><input type="text" value="新能源" class="bg-transparent border-none p-0 w-full"></td>
-                <td><input type="number" value="30" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
-                <td class="px-1"><input type="number" value="1.00" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
-                <td class="px-1"><input type="number" value="2.00" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
-                <td class="px-1"><input type="number" value="3.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
-                <td class="px-1"><input type="number" value="5.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold"></td>
+                <td class="py-2 pr-2 font-semibold text-slate-700">
+                    <input type="text" value="${name}" class="energy-name bg-transparent border-none p-0 w-full outline-none focus:text-blue-600 transition-colors">
+                </td>
+                <td><input type="number" value="${cf}" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent outline-none"></td>
+                <td class="px-1"><input type="number" value="${caps[2026]}" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
+                <td class="px-1"><input type="number" value="${caps[2030]}" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
+                <td class="px-1"><input type="number" value="${caps[2035]}" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
+                <td class="px-1"><input type="number" value="${caps[2050]}" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold"></td>
                 <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
             `;
             tbody.appendChild(newRow);
@@ -413,9 +358,73 @@
             calculate();
         }
 
+        // Export/Import Functions
+        function exportSettings() {
+            const rows = document.querySelectorAll('.energy-row');
+            const exportData = {
+                growthRate: parseFloat(document.getElementById('growthRate').value),
+                energies: []
+            };
+
+            rows.forEach(row => {
+                exportData.energies.push({
+                    name: row.querySelector('.energy-name').value,
+                    cf: parseFloat(row.querySelector('.cf-input').value),
+                    cap: {
+                        2026: parseFloat(row.querySelector('.cap-2026').value),
+                        2030: parseFloat(row.querySelector('.cap-2030').value),
+                        2035: parseFloat(row.querySelector('.cap-2035').value),
+                        2050: parseFloat(row.querySelector('.cap-2050').value)
+                    }
+                });
+            });
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `energy_mix_projection_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importSettings(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    // Update Growth Rate
+                    if (importedData.growthRate !== undefined) {
+                        syncGrowth(importedData.growthRate);
+                    }
+
+                    // Update Table
+                    if (importedData.energies && Array.isArray(importedData.energies)) {
+                        const tbody = document.querySelector('#energyTable tbody');
+                        tbody.innerHTML = ''; // Clear current rows
+                        importedData.energies.forEach(energy => addRow(energy));
+                    }
+                    
+                    calculate();
+                } catch (err) {
+                    alert('匯入檔案格式錯誤，請確保檔案是由此工具導出的 JSON 檔案。');
+                }
+            };
+            reader.readAsText(file);
+            // Reset file input
+            event.target.value = '';
+        }
+
         window.onload = function() {
             initCharts();
-            calculate();
+            // Initialize with default data
+            defaultEnergies.forEach(energy => addRow(energy));
         };
     </script>
 </body>
