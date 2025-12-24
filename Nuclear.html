@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>核能專區 - 能源及政策分析儀</title>
+    <!-- 
+      /* --- SYSTEM ARCHITECTURE: Nuclear.html v1.5 --- */
+      1. 數據修正：將發電佔比由 2025 估值改為 2024 正式實績數字 (5.0%)。
+      2. 單位維持：Y 軸維持「億度」單位，方便閱讀與換算。
+      3. 高對比視覺：針對白底背景優化，移除所有低對比灰色。
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Inter:wght@400;700;900&display=swap');
+        
+        :root {
+            --brand-primary: #4f46e5;
+            --brand-indigo: #4338ca;
+            --brand-nuclear: #f59e0b;
+            --bg-main: #f8fafc;
+        }
+
+        body { 
+            font-family: 'Inter', 'Noto Sans TC', sans-serif; 
+            background-color: var(--bg-main); 
+            color: #1e293b;
+            margin: 0;
+            overflow: hidden;
+            font-size: 18px; 
+        }
+
+        .main-scroll {
+            height: 100vh;
+            overflow-y: auto;
+            padding-bottom: 6rem;
+            scroll-behavior: smooth;
+        }
+
+        .glass-card {
+            background: #ffffff;
+            border-radius: 1rem;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .status-badge {
+            padding: 0.35rem 1rem;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .status-decommission { background: #fee2e2; color: #991b1b; border: 1px solid #991b1b; }
+        .status-seal { background: #f1f5f9; color: #334155; border: 1px solid #334155; }
+        .status-voted { background: #e0f2fe; color: #0369a1; border: 1px solid #0369a1; }
+
+        #loader {
+            position: fixed; inset: 0; background: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center;
+        }
+
+        .main-scroll::-webkit-scrollbar { width: 5px; }
+        .main-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        
+        .referendum-card {
+            border-left: 6px solid #4f46e5;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div id="loader">
+        <div class="flex flex-col items-center gap-3">
+            <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm font-black text-slate-800 tracking-widest uppercase">Syncing Historical Metrics...</p>
+        </div>
+    </div>
+
+    <div class="main-scroll p-6 md:p-10">
+        <div class="max-w-[1500px] mx-auto space-y-8">
+            
+            <!-- 頂部標題 -->
+            <header class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-300 pb-6">
+                <div class="space-y-3">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 rounded-full mb-1 border border-amber-200">
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-600 animate-pulse"></span>
+                        <span class="text-amber-800 font-black text-[11px] uppercase tracking-[0.1em]">Nuclear Lifecycle Analytics</span>
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 leading-tight">核能專區</h2>
+                    <p class="text-slate-800 font-bold text-lg md:text-xl">監測核電退場進度、實績佔比與重大公投之歷史數據紀錄。</p>
+                </div>
+                <div class="bg-slate-900 text-white px-5 py-2.5 rounded-xl shadow-lg text-right">
+                    <p class="text-[10px] font-black uppercase opacity-70 leading-none mb-1">Latest Update</p>
+                    <p class="text-xl font-black italic">2025 年 12 月</p>
+                </div>
+            </header>
+
+            <!-- 數據概覽看板 -->
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-6 border-l-[6px] border-l-red-600">
+                    <p class="text-slate-800 font-black text-sm uppercase mb-1">核電廠運轉狀態</p>
+                    <div class="flex items-center gap-3">
+                        <h4 class="text-4xl font-black text-slate-900">全面除役中</h4>
+                        <span class="status-badge status-decommission">Shutdown</span>
+                    </div>
+                    <p class="text-slate-700 text-sm mt-2 font-bold">2025/08 公投未過關，維持除役路徑</p>
+                </div>
+                <div class="glass-card p-6 border-l-[6px] border-l-indigo-600">
+                    <p class="text-slate-800 font-black text-sm uppercase mb-1">2024 年度發電佔比 (實績)</p>
+                    <h4 class="text-5xl font-black text-slate-900 tracking-tighter">5.0 <span class="text-xl text-slate-600">%</span></h4>
+                    <p class="text-slate-700 text-sm mt-2 font-bold">根據 2024 年全年度發電數據統計</p>
+                </div>
+                <div class="glass-card p-6 border-l-[6px] border-l-emerald-600">
+                    <p class="text-slate-800 font-black text-sm uppercase mb-1">歷史自發成本 (均值)</p>
+                    <h4 class="text-5xl font-black text-slate-900 tracking-tighter">1.98 <span class="text-xl text-slate-600">元/度</span></h4>
+                    <p class="text-slate-700 text-sm mt-2 font-bold">營運期間穩定支撐低電價之經濟紀錄</p>
+                </div>
+            </section>
+
+            <!-- 公投歷史整理 -->
+            <section class="space-y-6">
+                <div class="flex items-center gap-4">
+                    <h3 class="text-2xl font-black text-slate-900 flex items-center gap-3">
+                        <i data-lucide="vote" class="text-indigo-700 w-7 h-7"></i> 核能相關重要公投紀錄
+                    </h3>
+                    <div class="flex-1 h-[2px] bg-slate-300"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- 2025 核三延役 -->
+                    <div class="glass-card p-8 referendum-card border-l-amber-500 shadow-lg">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="year-indicator bg-amber-600 text-white px-3 py-1 rounded-md font-black text-sm">2025</span>
+                            <span class="status-badge status-decommission">不通過</span>
+                        </div>
+                        <h4 class="text-xl font-black text-slate-900 mb-2">第 21 案 (核三延役)</h4>
+                        <p class="text-slate-800 font-bold leading-relaxed mb-4 text-base">
+                            主文：您是否同意第三核能發電廠經主管機關同意確認無安全疑慮後，繼續運轉？
+                        </p>
+                        <div class="bg-amber-50 p-4 rounded-xl border border-amber-100 text-base">
+                            <span class="font-black text-amber-700">結果：</span> 同意票佔 74%，但因投票率未達 25% 門檻而不通過。
+                        </div>
+                    </div>
+
+                    <!-- 2021 核四重啟 -->
+                    <div class="glass-card p-8 referendum-card border-l-red-600">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="year-indicator bg-red-700 text-white px-3 py-1 rounded-md font-black text-sm">2021</span>
+                            <span class="status-badge status-decommission">不通過</span>
+                        </div>
+                        <h4 class="text-xl font-black text-slate-900 mb-2">第 17 案 (重啟核四)</h4>
+                        <p class="text-slate-800 font-bold leading-relaxed mb-4 text-base">
+                            主文：您是否同意核四啟封商轉發電？
+                        </p>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-base">
+                            <span class="font-black text-red-700">結果：</span> 否決重啟方案。核四廠維持封存資產維護狀態。
+                        </div>
+                    </div>
+
+                    <!-- 2018 以核養綠 -->
+                    <div class="glass-card p-8 referendum-card">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="year-indicator bg-indigo-700 text-white px-3 py-1 rounded-md font-black text-sm">2018</span>
+                            <span class="status-badge status-active">通過</span>
+                        </div>
+                        <h4 class="text-xl font-black text-slate-900 mb-2">第 16 案 (以核養綠)</h4>
+                        <p class="text-slate-800 font-bold leading-relaxed mb-4 text-base">
+                            主文：您是否同意：廢止電業法第95條第1項「核能發電設備應於 2025 年以前全部停止運轉」？
+                        </p>
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-base">
+                            <span class="font-black text-indigo-700">結果：</span> 通過廢止該條文。但電廠仍因執照過期及相關時序陸續除役。
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 主要圖表區 (單位：億度) -->
+            <section class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <div class="glass-card p-8">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 class="font-black text-slate-900 text-2xl">核能發電近年發電情形</h3>
+                            <p class="text-slate-700 text-xs font-black uppercase tracking-widest">Recent Generation Statistics (100M kWh)</p>
+                        </div>
+                    </div>
+                    <div id="chart-nuclear-trend"></div>
+                </div>
+
+                <!-- 各電廠狀態列表 -->
+                <div class="glass-card p-8">
+                    <h3 class="font-black text-slate-900 text-2xl mb-6 flex items-center gap-3">
+                        <i data-lucide="shield-alert" class="text-red-700 w-6 h-6"></i> 全台核能電廠現狀 (2025 年)
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-5 bg-slate-50 rounded-xl border border-slate-200">
+                            <div>
+                                <h4 class="font-black text-slate-900">第一核能發電廠 (石門)</h4>
+                                <p class="text-slate-800 text-sm font-bold mt-1">2019 年正式進入除役階段</p>
+                            </div>
+                            <span class="status-badge status-decommission">除役中</span>
+                        </div>
+                        <div class="flex items-center justify-between p-5 bg-slate-50 rounded-xl border border-slate-200">
+                            <div>
+                                <h4 class="font-black text-slate-900">第二核能發電廠 (萬里)</h4>
+                                <p class="text-slate-800 text-sm font-bold mt-1">2023 年正式進入除役階段</p>
+                            </div>
+                            <span class="status-badge status-decommission">除役中</span>
+                        </div>
+                        <div class="flex items-center justify-between p-5 bg-red-50 rounded-xl border border-red-200">
+                            <div>
+                                <h4 class="font-black text-red-900">第三核能發電廠 (恆春)</h4>
+                                <p class="text-red-800 text-sm font-bold mt-1">2025 年 05 月完成機組停機，啟動除役</p>
+                            </div>
+                            <span class="status-badge status-decommission">除役中</span>
+                        </div>
+                        <div class="flex items-center justify-between p-5 bg-slate-100 rounded-xl border border-slate-300">
+                            <div>
+                                <h4 class="font-black text-slate-900">第四核能發電廠 (貢寮)</h4>
+                                <p class="text-slate-800 text-sm font-bold mt-1">維持封存現狀，評估轉型可能</p>
+                            </div>
+                            <span class="status-badge status-seal">資產維護中</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 專業洞察 -->
+            <section class="max-w-[1300px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 pb-20">
+                <div class="p-8 bg-indigo-900 text-white rounded-3xl shadow-xl border-b-8 border-indigo-700">
+                    <h3 class="text-2xl font-black mb-4 flex items-center gap-3">
+                        <i data-lucide="zap" class="text-amber-400"></i> 後核能時代：SMR 發展觀察
+                    </h3>
+                    <p class="text-indigo-100 leading-relaxed font-bold">
+                        隨 2025 年所有商轉核電廠進入除役期，國內對「小型模組化反應爐 (SMR)」的技術討論仍在持續，主要關注其安全性與輔助淨零排放的潛力。
+                    </p>
+                </div>
+                <div class="p-8 bg-slate-900 text-white rounded-3xl shadow-xl border-b-8 border-slate-800">
+                    <h3 class="text-2xl font-black mb-4 flex items-center gap-3">
+                        <i data-lucide="shield-check" class="text-blue-400"></i> 轉型責任：核廢料處置
+                    </h3>
+                    <p class="text-slate-300 leading-relaxed font-bold">
+                        全面進入除役期後，高放射性廢棄物的乾式貯存與最終處置選址成為核心挑戰，這也是落實能源公正轉型承諾中最艱鉅的社會工程。
+                    </p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        function initNuclearStation() {
+            lucide.createIcons();
+
+            const trendOptions = {
+                series: [{
+                    name: '核能發電量 (億度)',
+                    data: [423.9, 364.7, 316.6, 224.5, 276.8, 323.0, 314.4, 277.6, 237.5, 188.8, 165.0, 28.0]
+                }],
+                chart: { type: 'area', height: 400, toolbar: { show: false }, fontFamily: 'Inter, Noto Sans TC' },
+                colors: ['#f59e0b'],
+                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.1 } },
+                stroke: { curve: 'smooth', width: 5 },
+                xaxis: { 
+                    categories: ['2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025(估)'],
+                    labels: { style: { fontWeight: 900, colors: '#334155' } }
+                },
+                yaxis: { 
+                    title: { text: '單位：億度', style: { fontWeight: 900, fontSize: '14px', color: '#1e293b' } },
+                    labels: { style: { fontWeight: 900, colors: '#334155' } } 
+                },
+                grid: { borderColor: '#e2e8f0', strokeDashArray: 4 },
+                tooltip: { 
+                    theme: 'dark',
+                    y: { formatter: (v) => v.toFixed(1) + " 億度" }
+                },
+                annotations: {
+                    xaxis: [{
+                        x: '2025(估)',
+                        borderColor: '#dc2626',
+                        label: {
+                            style: { color: '#fff', background: '#dc2626', fontWeight: 900 },
+                            text: '2025.05 役滿停機'
+                        }
+                    }]
+                }
+            };
+
+            new ApexCharts(document.querySelector("#chart-nuclear-trend"), trendOptions).render();
+
+            setTimeout(() => {
+                const loader = document.getElementById('loader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 500);
+                }
+            }, 300);
+        }
+
+        document.addEventListener("DOMContentLoaded", initNuclearStation);
+    </script>
+</body>
+</html>
