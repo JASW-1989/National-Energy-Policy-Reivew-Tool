@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國家能源全方位分析系統 - v22.1 Responsive Portal</title>
+    <title>國家能源全方位分析系統 - v22.3 Portal</title>
     <!-- 
-      /* --- SYSTEM ARCHITECTURE: v22.1 (Fluid Content Fix) --- */
-      1. 修復：解決手機版側邊欄隱藏時，右側內容區無法自動填滿 100% 寬度的問題。
-      2. 佈局：將手機版側邊欄設為真正脫離流量 (Width: 0)，確保 flex-1 內容區自動擴張。
-      3. 互動：優化桌面端縮排與手機端切換的視覺連貫性。
+      /* --- SYSTEM ARCHITECTURE: v22.3 (Navigation Reordering) --- */
+      1. 調整：將「各類能源成本」挪至導航清單最末端。
+      2. 響應式：維持手機端抽屜選單與桌面端縮排功能。
+      3. 邏輯：確保導航順序符合由整體概況到具體成本的分析流程。
     -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -30,21 +30,20 @@
             border-right: 1px solid #e2e8f0; 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 100;
-            flex-shrink: 0; /* 防止側邊欄被擠壓 */
+            flex-shrink: 0;
         }
 
         /* 桌面端寬度控制 */
         .sidebar-expanded { width: 280px; }
         .sidebar-collapsed { width: 80px; }
 
-        /* 手機端關鍵修復：抽屜式導航不應佔據佈局寬度 */
+        /* 手機端抽屜樣式 */
         @media (max-width: 768px) {
             .sidebar {
                 position: fixed;
                 height: 100vh;
-                width: 280px; /* 抽屜開啟時的寬度 */
+                width: 280px;
                 transform: translateX(-100%);
-                /* 在手機版，我們讓 aside 標籤本身不佔據 flex 寬度 */
                 margin-right: -280px; 
             }
             .sidebar.mobile-open {
@@ -62,7 +61,7 @@
             display: flex; 
             align-items: center; 
             gap: 0.8rem; 
-            padding: 1rem 1.25rem; 
+            padding: 0.85rem 1.25rem; 
             border-radius: 0.85rem; 
             color: #64748b; 
             font-weight: 700; 
@@ -146,7 +145,6 @@
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* 背景遮罩 */
         .backdrop {
             position: fixed;
             inset: 0;
@@ -162,7 +160,6 @@
 </head>
 <body class="flex">
 
-    <!-- 背景遮罩 -->
     <div id="backdrop" class="backdrop" onclick="toggleSidebar()"></div>
 
     <!-- 側邊導航 -->
@@ -174,24 +171,23 @@
                 </div>
                 <div class="logo-text transition-opacity duration-300">
                     <h1 class="font-black text-base leading-tight tracking-tight text-slate-800">能源分析系統</h1>
-                    <span class="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded uppercase font-black text-[8px]">v22.1 Portal</span>
+                    <span class="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded uppercase font-black text-[8px]">v22.3 Portal</span>
                 </div>
             </div>
-            <!-- 桌面端切換鈕 -->
             <button onclick="toggleCollapse()" class="hidden md:flex p-1.5 hover:bg-slate-100 rounded-lg text-slate-400">
                 <i id="collapse-icon" data-lucide="chevron-left" class="w-5 h-5"></i>
             </button>
         </div>
         
         <nav id="master-nav" class="flex-1 space-y-1">
-            <!-- 導航項目動態載入 -->
+            <!-- JS 動態渲染 -->
         </nav>
 
         <div class="pt-6 border-t border-slate-100 mt-auto footer-text transition-opacity duration-300">
             <div class="bg-slate-50 p-3 rounded-xl mb-4 text-center">
                 <p class="text-[9px] font-black text-emerald-600 flex items-center justify-center gap-1.5 uppercase">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Cloud Connected
+                    System Online
                 </p>
             </div>
             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-relaxed text-center">
@@ -200,7 +196,6 @@
         </div>
     </aside>
 
-    <!-- 內容主體區 -->
     <main class="content-container">
         <header class="mobile-header">
             <button onclick="toggleSidebar()" class="p-2 text-slate-600">
@@ -212,7 +207,7 @@
 
         <div id="page-loader">
             <div class="loader-spinner mb-3"></div>
-            <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Initializing Interface...</p>
+            <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Loading Resources...</p>
         </div>
         
         <iframe id="content-frame" name="content-frame" src=""></iframe>
@@ -225,7 +220,9 @@
             { id: 'demand', label: '能源需求分析', icon: 'activity', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/demand_station.html' },
             { id: 'renewable', label: '再生能源分析', icon: 'leaf', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/renewable_station.html' },
             { id: 'solar', label: '太陽光電專區', icon: 'sun', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/solar_station.html' },
-            { id: 'policy', label: '我國能源政策', icon: 'map', url: 'EnergyPolicy.html' }
+            { id: 'policy', label: '我國能源政策', icon: 'map', url: 'EnergyPolicy.html' },
+            // 各類能源成本挪至最下方
+            { id: 'cost', label: '各類能源成本', icon: 'banknote', url: 'EnergyCost.html' }
         ];
 
         const sidebar = document.getElementById('sidebar');
