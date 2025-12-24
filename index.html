@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國家能源全方位分析系統 - v23.0 Portal</title>
+    <title>國家能源全方位分析系統 - v24.1 Portal</title>
     <!-- 
-      /* --- SYSTEM ARCHITECTURE: v23.0 (Layout Fix & Nav Expansion) --- */
-      1. 新增分頁：加入「公正轉型」 (Just Transition) 模組。
-      2. 縮排修正：修正 sidebar-collapsed 狀態下的文字溢出與圖示對齊問題。
-      3. 響應式：確保手機端、桌面端縮排後，iframe 內容區均能自動填滿剩餘寬度。
+      /* --- SYSTEM ARCHITECTURE: v24.1 (URL Deployment & Alignment) --- */
+      1. 網址更新：將政策、成本、公正轉型導航至 GitHub 正式網址。
+      2. 縮排修正：優化 sidebar-collapsed 狀態下的 Icon 居中對齊邏輯。
+      3. 視覺一致性：側邊欄收合寬度維持 80px，確保內容區（iframe）自動填滿剩餘空間。
     -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -24,21 +24,23 @@
             display: flex;
         }
 
-        /* 側邊欄過渡與基礎樣式 */
+        /* 側邊欄基礎與動畫 */
         .sidebar { 
             background: #ffffff; 
             border-right: 1px solid #e2e8f0; 
             transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 100;
             flex-shrink: 0;
-            overflow-x: hidden; /* 防止縮排時出現水平捲軸 */
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* 桌面端寬度 */
+        /* 寬度定義 */
         .sidebar-expanded { width: 280px; }
-        .sidebar-collapsed { width: 88px; }
+        .sidebar-collapsed { width: 80px; }
 
-        /* 手機端抽屜樣式 */
+        /* 手機端響應式 */
         @media (max-width: 768px) {
             .sidebar {
                 position: fixed;
@@ -58,7 +60,7 @@
             }
         }
 
-        /* 導航連結優化 */
+        /* 導航連結佈局 */
         .nav-link { 
             display: flex; 
             align-items: center; 
@@ -66,19 +68,21 @@
             border-radius: 0.85rem; 
             color: #64748b; 
             font-weight: 700; 
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             cursor: pointer;
             text-decoration: none;
             margin-bottom: 0.25rem;
             white-space: nowrap;
+            width: calc(100% - 1.5rem);
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        /* 縮排狀態下的選單置中 */
+        /* 縮排狀態下的對齊修正：強制 Icon 置中靠齊 */
         .sidebar-collapsed .nav-link {
-            justify-content: center;
             padding: 0.85rem 0;
-            margin-left: 0.5rem;
-            margin-right: 0.5rem;
+            justify-content: center;
+            width: 50px; 
         }
 
         .nav-link:hover { background-color: #f1f5f9; color: #1e293b; }
@@ -89,19 +93,21 @@
             border-top-left-radius: 0;
             border-bottom-left-radius: 0;
         }
-
-        /* 內容隱藏動畫：解決文字殘留問題 */
-        .collapsible-content {
-            transition: opacity 0.2s ease, transform 0.2s ease;
-            display: inline-block;
-            margin-left: 0.8rem;
+        .sidebar-collapsed .nav-link.active {
+            border-left: none;
+            background-color: #eff6ff;
+            border-radius: 0.85rem;
         }
-        .sidebar-collapsed .collapsible-content {
+
+        /* 內容文字隱藏動畫 */
+        .collapsible-text {
+            transition: opacity 0.2s ease;
+            margin-left: 0.8rem;
+            display: inline-block;
+        }
+        .sidebar-collapsed .collapsible-text {
             opacity: 0;
-            visibility: hidden;
-            width: 0;
-            margin-left: 0;
-            position: absolute; /* 脫離流量避免撐開寬度 */
+            display: none; 
         }
 
         .content-container { 
@@ -114,30 +120,17 @@
             overflow: hidden;
         }
 
-        /* 手機端頂部 */
-        .mobile-header {
+        /* 頂部 Header 收合時隱藏文字 */
+        .sidebar-collapsed .logo-text,
+        .sidebar-collapsed .footer-text {
             display: none;
-            height: 60px;
-            background: #fff;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 0 1rem;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-        }
-        @media (max-width: 768px) { .mobile-header { display: flex; } }
-
-        iframe {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            border: none;
         }
 
+        /* Iframe 與 Loader */
+        iframe { flex: 1; width: 100%; height: 100%; border: none; }
         #page-loader {
             position: absolute;
             inset: 0;
-            top: 0;
             background: #ffffff;
             display: flex;
             flex-direction: column;
@@ -169,11 +162,6 @@
             transition: opacity 0.3s ease;
         }
         .backdrop.active { opacity: 1; pointer-events: auto; }
-
-        /* 頁尾區塊縮排優化 */
-        .sidebar-collapsed .footer-hide {
-            display: none;
-        }
     </style>
 </head>
 <body class="flex">
@@ -181,42 +169,43 @@
     <div id="backdrop" class="backdrop" onclick="toggleSidebar()"></div>
 
     <!-- 側邊導航 -->
-    <aside id="sidebar" class="sidebar sidebar-expanded flex flex-col p-4 h-screen sticky top-0">
+    <aside id="sidebar" class="sidebar sidebar-expanded h-screen sticky top-0 p-4">
         <div class="flex items-center justify-between mb-8 px-2">
             <div class="flex items-center gap-3 overflow-hidden">
                 <div class="bg-blue-600 p-2 rounded-xl text-white shadow-lg shrink-0">
                     <i data-lucide="layout-template" class="w-6 h-6"></i>
                 </div>
-                <div class="collapsible-content">
+                <div class="logo-text">
                     <h1 class="font-black text-base leading-tight tracking-tight text-slate-800">能源分析系統</h1>
-                    <span class="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded uppercase font-black text-[8px]">v23.0 Portal</span>
+                    <span class="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded uppercase font-black text-[8px]">v24.1 Portal</span>
                 </div>
             </div>
-            <!-- 桌面端縮排鈕 -->
+            <!-- 桌面端切換鈕 -->
             <button onclick="toggleCollapse()" class="hidden md:flex p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 shrink-0">
                 <i id="collapse-icon" data-lucide="chevron-left" class="w-5 h-5"></i>
             </button>
         </div>
         
         <nav id="master-nav" class="flex-1 space-y-1">
-            <!-- 由 JS 動態渲染 -->
+            <!-- JS 動態載入 -->
         </nav>
 
-        <div class="pt-6 border-t border-slate-100 mt-auto">
-            <div class="footer-hide bg-slate-50 p-3 rounded-xl mb-4 text-center">
+        <div class="pt-6 border-t border-slate-100 mt-auto flex flex-col items-center">
+            <div class="footer-text bg-slate-50 p-3 rounded-xl mb-4 text-center w-full">
                 <p class="text-[9px] font-black text-emerald-600 flex items-center justify-center gap-1.5 uppercase">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    System Operational
+                    Online
                 </p>
             </div>
-            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-relaxed text-center">
-                <span class="footer-hide">Designed by Dr. JASW<br/></span>© 2025 Analytics
+            <p class="text-[10px] font-black text-slate-400 tracking-widest text-center">
+                © 2025
             </p>
         </div>
     </aside>
 
     <main class="content-container">
-        <header class="mobile-header">
+        <!-- 手機頂部欄 -->
+        <header class="md:hidden flex h-[60px] bg-white border-bottom border-slate-200 items-center px-4 justify-between shrink-0">
             <button onclick="toggleSidebar()" class="p-2 text-slate-600">
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
@@ -226,23 +215,23 @@
 
         <div id="page-loader">
             <div class="loader-spinner mb-3"></div>
-            <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Initializing Module...</p>
+            <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Switching Dashboard...</p>
         </div>
         
         <iframe id="content-frame" name="content-frame" src=""></iframe>
     </main>
 
     <script>
+        // 更新後的導航配置：全面更換為正式網址
         const NAVIGATION_CONFIG = [
             { id: 'overview', label: '總體能源概況', icon: 'layout-dashboard', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/overview.html' },
             { id: 'key_metrics', label: '關鍵發展指標', icon: 'target', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/key_metrics.html' },
             { id: 'demand', label: '能源需求分析', icon: 'activity', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/demand_station.html' },
             { id: 'renewable', label: '再生能源分析', icon: 'leaf', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/renewable_station.html' },
             { id: 'solar', label: '太陽光電專區', icon: 'sun', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/solar_station.html' },
-            { id: 'policy', label: '我國能源政策', icon: 'map', url: 'EnergyPolicy.html' },
-            // 新增分頁：公正轉型
-            { id: 'just', label: '公正轉型', icon: 'scale', url: 'justtransition.html' },
-            { id: 'cost', label: '各類能源成本', icon: 'banknote', url: 'EnergyCost.html' }
+            { id: 'policy', label: '我國能源政策', icon: 'map', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/EnergyPolicy.html' },
+            { id: 'cost', label: '各類能源成本', icon: 'banknote', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/EnergyCost.html' },
+            { id: 'just', label: '公正轉型', icon: 'scale', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/justtransition.html' }
         ];
 
         const sidebar = document.getElementById('sidebar');
@@ -268,7 +257,7 @@
                 sidebar.classList.replace('sidebar-collapsed', 'sidebar-expanded');
                 collapseIcon.setAttribute('data-lucide', 'chevron-left');
             }
-            lucide.createIcons();
+            renderNav(); 
         }
 
         function switchPage(id) {
@@ -294,7 +283,7 @@
                 <div class="nav-link ${currentActive === item.id ? 'active' : ''}" 
                      onclick="switchPage('${item.id}')" title="${item.label}">
                     <i data-lucide="${item.icon}" class="w-5 h-5 shrink-0"></i>
-                    <span class="collapsible-content font-bold">${item.label}</span>
+                    <span class="collapsible-text font-bold text-sm">${item.label}</span>
                 </div>
             `).join('');
             lucide.createIcons();
