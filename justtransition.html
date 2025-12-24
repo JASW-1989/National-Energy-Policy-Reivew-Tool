@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國家能源公正轉型看板 - v1.4 閱讀強化版</title>
+    <title>國家能源公正轉型看板 - v1.5 重點強化版</title>
     <!-- 
-      /* --- SYSTEM ARCHITECTURE: Just Transition v1.4 --- */
-      1. 閱讀優化：全面放大字體（基準 22px），提升年長者與視力需求者的閱讀舒適度。
-      2. 法源依據：包含《氣候變遷因應法》公正轉型法定定義。
-      3. 委員會更新：包含歷次會議紀錄官方連結與第 12 項關鍵戰略資訊。
+      /* --- SYSTEM ARCHITECTURE: Just Transition v1.5 --- */
+      1. 佈局回歸：恢復 18px 基準字體，維持專業精鍊感。
+      2. 視覺錨點：特別放大「尊嚴勞動、在地包容、弱勢補償、社會對話」四項原則字體。
+      3. 內容同步：維持最新法規定義與委員會會議紀錄連結。
     -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -29,8 +29,8 @@
             color: #1e293b;
             margin: 0;
             overflow: hidden;
-            /* 顯著放大字體：從 18px 提升至 22px */
-            font-size: 22px; 
+            /* 恢復至前一版本基準字體 */
+            font-size: 18px; 
         }
 
         .main-scroll {
@@ -49,7 +49,7 @@
         }
 
         .legal-quote {
-            border-left: 10px solid var(--brand-indigo);
+            border-left: 8px solid var(--brand-indigo);
             background: linear-gradient(to right, #eef2ff, #ffffff);
         }
 
@@ -71,7 +71,7 @@
             justify-content: center;
         }
 
-        .main-scroll::-webkit-scrollbar { width: 6px; }
+        .main-scroll::-webkit-scrollbar { width: 5px; }
         .main-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
@@ -79,60 +79,60 @@
 
     <div id="loader">
         <div class="flex flex-col items-center gap-4">
-            <div class="w-14 h-14 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-sm font-black text-slate-400 tracking-widest uppercase">Optimizing Visibility...</p>
+            <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-xs font-black text-slate-400 tracking-widest uppercase">Aligning Strategy Metrics...</p>
         </div>
     </div>
 
     <div class="main-scroll p-6 md:p-10 lg:p-14">
-        <div class="max-w-[1500px] mx-auto space-y-12">
+        <div class="max-w-[1500px] mx-auto space-y-10">
             
             <!-- 頂部標題 -->
-            <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-200 pb-10">
-                <div class="space-y-4">
-                    <div class="inline-flex items-center gap-3 px-5 py-2 bg-indigo-50 rounded-full mb-1">
-                        <span class="w-3 h-3 rounded-full bg-indigo-600 animate-pulse"></span>
-                        <span class="text-indigo-600 font-black text-sm uppercase tracking-[0.15em]">Just Transition Strategy Hub</span>
+            <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-200 pb-8">
+                <div class="space-y-3">
+                    <div class="inline-flex items-center gap-3 px-4 py-1.5 bg-indigo-50 rounded-full mb-1">
+                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse"></span>
+                        <span class="text-indigo-600 font-black text-xs uppercase tracking-[0.15em]">Just Transition Strategy Hub</span>
                     </div>
-                    <h2 class="text-5xl md:text-7xl font-black tracking-tighter text-slate-900 leading-tight">公正轉型策略</h2>
-                    <p class="text-slate-500 font-medium text-xl md:text-3xl leading-relaxed">國家 2050 淨零路徑之核心價值：確保社會公平與正義。</p>
+                    <h2 class="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 leading-tight">公正轉型策略</h2>
+                    <p class="text-slate-500 font-medium text-lg md:text-2xl leading-relaxed">國家 2050 淨零路徑之核心價值：確保社會公平與正義。</p>
                 </div>
             </header>
 
-            <!-- 1. 氣候變遷因應法定義 (字體強化) -->
-            <section class="legal-quote p-10 md:p-12 rounded-r-3xl shadow-sm">
-                <div class="flex items-center gap-4 mb-6 text-indigo-700">
-                    <i data-lucide="scale" class="w-8 h-8"></i>
-                    <h3 class="font-black text-2xl tracking-wide uppercase italic">氣候變遷因應法 - 法定定義</h3>
+            <!-- 1. 氣候變遷因應法定義 -->
+            <section class="legal-quote p-8 md:p-10 rounded-r-3xl shadow-sm">
+                <div class="flex items-center gap-3 mb-4 text-indigo-700">
+                    <i data-lucide="scale" class="w-6 h-6"></i>
+                    <h3 class="font-black text-xl tracking-wide uppercase italic text-[16px]">氣候變遷因應法 - 法定定義</h3>
                 </div>
-                <blockquote class="text-slate-800 text-2xl md:text-4xl font-bold leading-[1.4] italic">
+                <blockquote class="text-slate-800 text-xl md:text-2xl font-bold leading-relaxed italic">
                     「公正轉型：指在尊重人權及尊嚴勞動之原則下，對於因淨零轉型受影響之社區、勞工、原住民族、弱勢族群及相關產業，致力於維持及創造優質工作機會，並確保其轉型過程中受公平對待之措施。」
                 </blockquote>
-                <p class="mt-6 text-slate-400 text-base font-black uppercase tracking-widest">— 《氣候變遷因應法》第 3 條第 10 款</p>
+                <p class="mt-4 text-slate-400 text-sm font-black uppercase tracking-widest">— 《氣候變遷因應法》第 3 條第 10 款</p>
             </section>
 
-            <!-- 2. 委員會與關鍵戰略 (區塊字體放大) -->
-            <section class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <!-- 2. 委員會與關鍵戰略 -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- 公正轉型委員會 -->
-                <div class="glass-card p-12 border-l-[12px] border-l-indigo-600">
-                    <div class="flex items-center gap-5 mb-8">
-                        <div class="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center">
-                            <i data-lucide="landmark" class="text-indigo-600 w-8 h-8"></i>
+                <div class="glass-card p-10 border-l-[8px] border-l-indigo-600">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="landmark" class="text-indigo-600 w-6 h-6"></i>
                         </div>
-                        <h3 class="font-black text-slate-900 text-3xl tracking-tight">公正轉型委員會</h3>
+                        <h3 class="font-black text-slate-900 text-2xl tracking-tight">公正轉型委員會</h3>
                     </div>
-                    <div class="space-y-6 text-slate-600 leading-relaxed text-xl">
+                    <div class="space-y-4 text-slate-600 leading-relaxed">
                         <p>
                             隸屬於<strong>行政院國家永續發展委員會</strong>之下，由國家發展委員會統籌規劃，邀請專家、民間團體、勞工代表及政府部門共同組成。
                         </p>
-                        <ul class="space-y-4 font-bold">
-                            <li class="flex items-center gap-3"><i data-lucide="chevron-right" class="w-5 h-5 text-indigo-500"></i> 定期辦理社會溝通與對話座談</li>
-                            <li class="flex items-center gap-3"><i data-lucide="chevron-right" class="w-5 h-5 text-indigo-500"></i> 監測各關鍵戰略之社會影響評估</li>
-                            <li class="flex items-start gap-3">
-                                <i data-lucide="chevron-right" class="w-5 h-5 text-indigo-500 mt-1.5"></i> 
-                                <a href="https://ncsd.ndc.gov.tw/Fore/nsdn/about0/Work12" target="_blank" class="text-indigo-600 hover:text-indigo-800 underline decoration-2 underline-offset-4 flex items-center gap-2">
+                        <ul class="space-y-3 font-bold">
+                            <li class="flex items-center gap-2 text-base"><i data-lucide="chevron-right" class="w-4 h-4 text-indigo-500"></i> 定期辦理社會溝通與對話座談</li>
+                            <li class="flex items-center gap-2 text-base"><i data-lucide="chevron-right" class="w-4 h-4 text-indigo-500"></i> 監測各關鍵戰略之社會影響評估</li>
+                            <li class="flex items-start gap-2 text-base">
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-indigo-500 mt-1"></i> 
+                                <a href="https://ncsd.ndc.gov.tw/Fore/nsdn/about0/Work12" target="_blank" class="text-indigo-600 hover:text-indigo-800 underline underline-offset-4 flex items-center gap-1.5">
                                     檢視公正轉型委員會：歷次會議紀錄
-                                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                                 </a>
                             </li>
                         </ul>
@@ -140,80 +140,87 @@
                 </div>
 
                 <!-- 第 12 項關鍵戰略 -->
-                <div class="glass-card p-12 border-l-[12px] border-l-emerald-600">
-                    <div class="flex items-center gap-5 mb-8">
-                        <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center">
-                            <i data-lucide="target" class="text-emerald-600 w-8 h-8"></i>
+                <div class="glass-card p-10 border-l-[8px] border-l-emerald-600">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <i data-lucide="target" class="text-emerald-600 w-6 h-6"></i>
                         </div>
-                        <h3 class="font-black text-slate-900 text-3xl tracking-tight">第 12 項關鍵戰略</h3>
+                        <h3 class="font-black text-slate-900 text-2xl tracking-tight">第 12 項關鍵戰略</h3>
                     </div>
-                    <div class="space-y-6 text-slate-600 leading-relaxed text-xl">
+                    <div class="space-y-4 text-slate-600 leading-relaxed text-base">
                         <p>
                             正式被列為國家 <strong>2050 淨零排放路徑圖</strong>中的關鍵戰略之一。本戰略跨越所有技術層面，旨在處理轉型帶來的社會衝擊。
                         </p>
-                        <div class="grid grid-cols-2 gap-4 mt-6">
-                            <div class="bg-emerald-50 p-4 rounded-xl text-center font-black text-emerald-800 text-sm uppercase tracking-tighter">勞工受影響評估</div>
-                            <div class="bg-emerald-50 p-4 rounded-xl text-center font-black text-emerald-800 text-sm uppercase tracking-tighter">產業轉型支援</div>
-                            <div class="bg-emerald-50 p-4 rounded-xl text-center font-black text-emerald-800 text-sm uppercase tracking-tighter">社會參與溝通</div>
-                            <div class="bg-emerald-50 p-4 rounded-xl text-center font-black text-emerald-800 text-sm uppercase tracking-tighter">脆弱群體照顧</div>
+                        <div class="grid grid-cols-2 gap-3 mt-4">
+                            <div class="bg-emerald-50 p-3 rounded-lg text-center font-black text-emerald-800 text-[11px] uppercase tracking-tighter">勞工受影響評估</div>
+                            <div class="bg-emerald-50 p-3 rounded-lg text-center font-black text-emerald-800 text-[11px] uppercase tracking-tighter">產業轉型支援</div>
+                            <div class="bg-emerald-50 p-3 rounded-lg text-center font-black text-emerald-800 text-[11px] uppercase tracking-tighter">社會參與溝通</div>
+                            <div class="bg-emerald-50 p-3 rounded-lg text-center font-black text-emerald-800 text-[11px] uppercase tracking-tighter">脆弱群體照顧</div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- 3. 核心四大支柱 (內容字體由 sm 提升至 lg) -->
+            <!-- 3. 核心四大支柱 (重點原則放大) -->
             <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <div class="glass-card p-10 pillar-card border-t-[10px] border-t-blue-500 flex flex-col">
-                    <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-                        <i data-lucide="users" class="text-blue-600 w-8 h-8"></i>
+                <!-- 勞動轉型 -->
+                <div class="glass-card p-8 pillar-card border-t-[8px] border-t-blue-500 flex flex-col">
+                    <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-6">
+                        <i data-lucide="users" class="text-blue-600 w-6 h-6"></i>
                     </div>
-                    <h3 class="font-black text-slate-800 text-2xl mb-4">勞動轉型</h3>
-                    <p class="text-slate-500 text-lg leading-relaxed flex-1">針對受轉型影響之勞工，提供職業訓練與再就業媒合，確保勞動市場穩定。</p>
-                    <div class="mt-6 pt-6 border-t border-slate-50 flex items-center gap-2 text-xs font-black text-blue-600 uppercase">
-                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> 尊嚴勞動原則
-                    </div>
-                </div>
-                <div class="glass-card p-10 pillar-card border-t-[10px] border-t-emerald-500 flex flex-col">
-                    <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mb-6">
-                        <i data-lucide="map-pin" class="text-emerald-600 w-8 h-8"></i>
-                    </div>
-                    <h3 class="font-black text-slate-800 text-2xl mb-4">區域發展</h3>
-                    <p class="text-slate-500 text-lg leading-relaxed flex-1">推動受轉型影響地區的產業再造，發展在地特色商機，緩解發展不均。</p>
-                    <div class="mt-6 pt-6 border-t border-slate-50 flex items-center gap-2 text-xs font-black text-emerald-600 uppercase">
-                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> 在地包容成長
+                    <h3 class="font-black text-slate-800 text-xl mb-3">勞動轉型</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed flex-1 italic">針對受轉型影響之勞工，提供職業訓練與再就業媒合，確保勞動市場穩定。</p>
+                    <div class="mt-6 pt-6 border-t border-slate-50 flex items-center gap-2 text-xl font-black text-blue-600">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i> 尊嚴勞動原則
                     </div>
                 </div>
-                <div class="glass-card p-10 pillar-card border-t-[10px] border-t-amber-500 flex flex-col">
-                    <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center mb-6">
-                        <i data-lucide="sun" class="text-amber-600 w-8 h-8"></i>
+
+                <!-- 區域發展 -->
+                <div class="glass-card p-8 pillar-card border-t-[8px] border-t-emerald-500 flex flex-col">
+                    <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-6">
+                        <i data-lucide="map-pin" class="text-emerald-600 w-6 h-6"></i>
                     </div>
-                    <h3 class="font-black text-slate-800 text-2xl mb-4">能源貧窮</h3>
-                    <p class="text-slate-500 text-lg leading-relaxed flex-1">協助弱勢族群更新節能設備、改善用電效率，確保轉型能源近用權。</p>
-                    <div class="mt-6 pt-6 border-t border-slate-50 flex items-center gap-2 text-xs font-black text-amber-600 uppercase">
-                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> 弱勢家戶補償
+                    <h3 class="font-black text-slate-800 text-xl mb-3">區域發展</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed flex-1 italic">推動受轉型影響地區的產業再造，發展在地特色商機，緩解發展不均。</p>
+                    <div class="mt-6 pt-6 border-t border-slate-50 flex items-center gap-2 text-xl font-black text-emerald-600">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i> 在地包容成長
                     </div>
                 </div>
-                <div class="glass-card p-10 pillar-card border-t-[10px] border-t-purple-500 flex flex-col">
-                    <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center mb-6">
-                        <i data-lucide="message-square" class="text-purple-600 w-8 h-8"></i>
+
+                <!-- 能源貧窮 -->
+                <div class="glass-card p-8 pillar-card border-t-[8px] border-t-amber-500 flex flex-col">
+                    <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center mb-6">
+                        <i data-lucide="sun" class="text-amber-600 w-6 h-6"></i>
                     </div>
-                    <h3 class="font-black text-slate-800 text-2xl mb-4">參與機制</h3>
-                    <p class="text-slate-500 text-lg leading-relaxed flex-1">建立透明對話平台，納入公民、團體參與政策討論，凝聚社會淨零共識。</p>
-                    <div class="mt-6 pt-6 border-t border-slate-50 flex items-center gap-2 text-xs font-black text-purple-600 uppercase">
-                        <i data-lucide="check-circle-2" class="w-4 h-4"></i> 社會民主對話
+                    <h3 class="font-black text-slate-800 text-xl mb-3">能源貧窮</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed flex-1 italic">協助弱勢族群更新節能設備、改善用電效率，確保轉型能源近用權。</p>
+                    <div class="mt-6 pt-6 border-t border-slate-50 flex items-center gap-2 text-xl font-black text-amber-600">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i> 弱勢家戶補償
+                    </div>
+                </div>
+
+                <!-- 參與機制 -->
+                <div class="glass-card p-8 pillar-card border-t-[8px] border-t-purple-500 flex flex-col">
+                    <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-6">
+                        <i data-lucide="message-square" class="text-purple-600 w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-black text-slate-800 text-xl mb-3">參與機制</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed flex-1 italic">建立透明對話平台，納入公民、團體參與政策討論，凝聚社會淨零共識。</p>
+                    <div class="mt-6 pt-6 border-t border-slate-50 flex items-center gap-2 text-xl font-black text-purple-600">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i> 社會民主對話
                     </div>
                 </div>
             </section>
 
-            <!-- 4. 底部資源 (標籤加大) -->
-            <section class="max-w-[1300px] mx-auto pb-24">
+            <!-- 4. 底部資源 -->
+            <section class="max-w-[1300px] mx-auto pb-20">
                 <div class="mt-10">
                     <a href="https://ncsd.ndc.gov.tw/_ofu/FileDatabase/72bba53f-376b-4619-b635-151d8bf985dd/%E6%A1%88%E7%94%B1%E4%B8%80%E7%B0%A1%E5%A0%B1_%E5%85%AC%E6%AD%A3%E8%BD%89%E5%9E%8B%E5%9F%B7%E8%A1%8C%E6%88%90%E6%9E%9C%E8%88%87%E6%9C%AA%E4%BE%86%E8%A6%8F%E5%8A%83%E4%BD%9C%E6%B3%95.pdf" 
                        target="_blank" 
-                       class="w-full py-8 bg-slate-900 text-white rounded-[2.5rem] font-black flex items-center justify-center gap-6 hover:bg-indigo-600 transition-all shadow-2xl group">
-                        <i data-lucide="file-text" class="w-8 h-8 group-hover:scale-110 transition-transform"></i>
-                        <span class="text-2xl tracking-tight">下載官方報告：公正轉型執行成果與未來規劃 (PDF)</span>
-                        <i data-lucide="external-link" class="w-5 h-5 opacity-50"></i>
+                       class="w-full py-6 bg-slate-900 text-white rounded-3xl font-black flex items-center justify-center gap-4 hover:bg-indigo-600 transition-all shadow-xl group">
+                        <i data-lucide="file-text" class="w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-lg tracking-tight">下載官方報告：公正轉型執行成果與未來規劃 (PDF)</span>
+                        <i data-lucide="external-link" class="w-4 h-4 opacity-50"></i>
                     </a>
                 </div>
             </section>
