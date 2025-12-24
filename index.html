@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國家能源全方位分析 - 總體概況 v19.5</title>
+    <!-- 
+      /* --- SYSTEM VERSION: v19.5 (Canvas Preview Optimized) --- */
+      1. 優化：將 window.onload 改為 DOMContentLoaded，提升預覽成功率。
+      2. 增強：加入圖表初始化防錯機制 (Graceful Degradation)。
+      3. 修正：確保 Lucide 圖示在動態注入 KPI 後能正確渲染。
+      4. 佈局：強化響應式設計，確保在不同螢幕尺寸下皆不溢出。
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
+        
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background-color: #f8fafc; 
+            color: #1e293b;
+            margin: 0;
+        }
+
+        /* 側邊欄美化 */
+        .sidebar { 
+            background: #ffffff; 
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link { 
+            display: flex; 
+            align-items: center; 
+            gap: 0.75rem; 
+            padding: 0.85rem 1.25rem; 
+            border-radius: 0.75rem; 
+            color: #64748b; 
+            font-weight: 700; 
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .nav-link:hover { 
+            background-color: #f1f5f9; 
+            color: #1e293b; 
+        }
+        
+        .nav-link.active { 
+            background-color: #eff6ff; 
+            color: #2563eb; 
+            box-shadow: inset 0 0 0 1px rgba(37,99,235,0.08);
+            border-left: 4px solid #2563eb;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        /* KPI 卡片 */
+        .kpi-card { 
+            background: white; 
+            border-radius: 1.5rem; 
+            border: 1px solid #e2e8f0; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            min-width: 0;
+            border-bottom-width: 4px;
+        }
+        
+        .kpi-card:hover { 
+            transform: translateY(-5px); 
+        }
+        
+        .kpi-value {
+            font-size: clamp(1.25rem, 2vw, 1.875rem);
+            font-weight: 900;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .main-content { 
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto; 
+            scroll-behavior: smooth; 
+            padding-bottom: 5rem;
+        }
+
+        .chart-card { 
+            background: white; 
+            border-radius: 1.5rem; 
+            border: 1px solid #e2e8f0; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+        }
+
+        /* 隱藏捲軸但保留功能 */
+        .main-content::-webkit-scrollbar { width: 6px; }
+        .main-content::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        
+        /* 載入中遮罩 */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
+
+    <!-- 載入動畫 -->
+    <div id="loader">
+        <div class="flex flex-col items-center gap-4">
+            <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm font-bold text-slate-500 animate-pulse">系統數據載入中...</p>
+        </div>
+    </div>
+
+    <!-- 側邊欄 -->
+    <aside class="sidebar w-full md:w-72 border-r border-slate-200 flex flex-col p-6 h-auto md:h-screen sticky top-0 z-50">
+        <div class="flex items-center gap-3 mb-10">
+            <div class="bg-blue-600 p-2.5 rounded-2xl text-white shadow-lg shadow-blue-200">
+                <i data-lucide="zap" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="font-black text-lg leading-tight tracking-tight text-slate-800">能源分析系統</h1>
+                <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-widest">v19.5 Preview</span>
+            </div>
+        </div>
+        
+        <nav class="flex-1 space-y-2">
+            <a href="#" class="nav-link active"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> 總體能源概況</a>
+            <a href="#" class="nav-link"><i data-lucide="target" class="w-5 h-5"></i> 關鍵發展指標</a>
+            <a href="#" class="nav-link"><i data-lucide="activity" class="w-5 h-5"></i> 能源需求分析</a>
+            <a href="#" class="nav-link"><i data-lucide="leaf" class="w-5 h-5"></i> 再生能源分析</a>
+            <a href="#" class="nav-link"><i data-lucide="sun" class="w-5 h-5"></i> 太陽光電專區</a>
+        </nav>
+
+        <div class="pt-6 border-t border-slate-100 mt-6 md:mt-auto">
+            <div class="bg-slate-50 p-4 rounded-xl mb-4">
+                <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">系統環境</p>
+                <p class="text-xs font-black text-slate-600">Canvas Stable v19.5</p>
+            </div>
+            <p class="text-[10px] font-medium text-slate-400 leading-relaxed uppercase tracking-tighter">
+                Designed by Dr. JASW<br/>© 2025 National Analytics
+            </p>
+        </div>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="main-content p-6 md:p-10 lg:p-14">
+        <div class="max-w-[1400px] mx-auto space-y-12">
+            
+            <!-- Header -->
+            <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                <div>
+                    <div class="flex items-center gap-2 text-blue-600 font-bold text-sm mb-2">
+                        <span class="px-2 py-0.5 bg-blue-50 rounded">即時數據</span>
+                        <span>最後更新：今日 08:30</span>
+                    </div>
+                    <h2 class="text-3xl md:text-4xl font-black tracking-tight text-slate-900">國家能源總體概況</h2>
+                    <p class="text-slate-500 mt-2 font-medium">匯整 114 年最新電力實績數據，提供政策制訂之基礎分析。</p>
+                </div>
+                
+                <div class="flex items-center gap-4 bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+                    <div class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">資料來源</p>
+                        <p class="text-sm font-bold text-slate-700">國家能源數據中心 (NEDC)</p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- KPI Grid -->
+            <div id="kpi-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+                <!-- 由 JavaScript 注入 -->
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="chart-card p-6 md:p-8">
+                    <div id="capacity-donut"></div>
+                </div>
+                <div class="chart-card p-6 md:p-8">
+                    <div id="generation-donut"></div>
+                </div>
+            </div>
+
+            <!-- Area Chart -->
+            <div class="chart-card p-6 md:p-10">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-xl font-black text-slate-800 flex items-center gap-3">
+                        <i data-lucide="trending-up" class="w-6 h-6 text-blue-600"></i> 我國能源發電占比演進 (2016-2024)
+                    </h3>
+                    <div class="hidden md:flex gap-2">
+                        <span class="text-xs font-bold text-slate-400 border border-slate-200 px-3 py-1 rounded-full italic">單位: %</span>
+                    </div>
+                </div>
+                <div id="evolution-area"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 定義全域主題色
+        const THEME = { 
+            coal: '#334155', 
+            gas: '#0ea5e9', 
+            oil: '#854d0e', 
+            re: '#22c55e', 
+            nuke: '#ef4444', 
+            pumped: '#1d4ed8', 
+            storage: '#d946ef' 
+        };
+
+        // 初始化 KPI 區塊
+        function renderKPIs() {
+            const data = [
+                { title: "全國總發電裝置容量", value: "69.2", unit: "GW", icon: "factory", border: "border-blue-500", bg: "bg-blue-50", text: "text-blue-600" },
+                { title: "114年 累計發電量", value: "242.2", unit: "億度", icon: "zap", border: "border-emerald-500", bg: "bg-emerald-50", text: "text-emerald-600" },
+                { title: "114年 綠能產出占比", value: "11.9", unit: "%", icon: "sun", border: "border-amber-500", bg: "bg-amber-50", text: "text-amber-600" },
+                { title: "系統調節容量", value: "3.4", unit: "GW", icon: "battery-charging", border: "border-purple-500", bg: "bg-purple-50", text: "text-purple-600" }
+            ];
+            
+            const grid = document.getElementById('kpi-grid');
+            if (grid) {
+                grid.innerHTML = data.map(d => `
+                    <div class="kpi-card p-6 ${d.border} flex items-center gap-5">
+                        <div class="w-14 h-14 flex-shrink-0 flex items-center justify-center rounded-2xl ${d.bg} ${d.text}">
+                            <i data-lucide="${d.icon}" class="w-7 h-7"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 truncate">${d.title}</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="kpi-value">${d.value}</span>
+                                <span class="text-[11px] font-bold text-slate-400">${d.unit}</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // 確保 Lucide 在 HTML 注入後重新掃描
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        }
+
+        // 圖表共用配置生成器
+        const getDonutCfg = (title, series, labels, unit) => ({
+            series, 
+            labels, 
+            chart: { 
+                type: 'donut', 
+                height: 400,
+                fontFamily: 'Noto Sans TC, sans-serif',
+                animations: { enabled: true, speed: 800 }
+            },
+            colors: [THEME.coal, THEME.gas, THEME.oil, THEME.re, THEME.nuke, THEME.pumped, THEME.storage],
+            title: { 
+                text: title, 
+                align: 'left', 
+                style: { fontSize: '18px', fontWeight: 900, color: '#1e293b' } 
+            },
+            stroke: { show: false },
+            plotOptions: { 
+                pie: { 
+                    donut: { 
+                        size: '75%', 
+                        labels: { 
+                            show: true, 
+                            name: { show: true, fontSize: '14px', fontWeight: 600, color: '#64748b', offsetY: -10 },
+                            value: { 
+                                show: true, fontSize: '24px', fontWeight: 900, color: '#1e293b', offsetY: 10,
+                                formatter: (val) => val + " " + unit 
+                            },
+                            total: { 
+                                show: true, label: '總計實績', fontWeight: 700, fontSize: '12px', color: '#94a3b8',
+                                formatter: (w) => w.globals.seriesTotals.reduce((a, b) => a + b, 0).toFixed(1) + " " + unit
+                            }
+                        } 
+                    } 
+                } 
+            },
+            tooltip: { y: { formatter: (val) => val + " " + unit } },
+            legend: { position: 'bottom', fontSize: '13px', fontWeight: 600, markers: { radius: 12, width: 10, height: 10 } },
+            dataLabels: { enabled: true, dropShadow: { enabled: false }, style: { fontSize: '11px', fontWeight: 800 } }
+        });
+
+        // 核心啟動邏輯
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. 渲染靜態組件
+            renderKPIs();
+
+            // 2. 檢查圖表庫是否載入成功
+            if (typeof ApexCharts === 'undefined') {
+                console.error("ApexCharts failed to load.");
+                document.getElementById('loader').innerHTML = '<p class="text-red-500 font-bold">載入失敗，請檢查網路連線。</p>';
+                return;
+            }
+
+            // 3. 延遲一下確保容器大小穩定 (特別在預覽環境)
+            setTimeout(() => {
+                try {
+                    // 容量分布
+                    new ApexCharts(document.querySelector("#capacity-donut"), getDonutCfg(
+                        "發電裝置容量分布 (GW)", [19.8, 22.5, 1.2, 22.3, 0.0, 2.6, 0.8], 
+                        ['燃煤','燃氣','燃油','再生能源','核能','抽蓄','儲能'], 'GW'
+                    )).render();
+
+                    // 發電量分布
+                    new ApexCharts(document.querySelector("#generation-donut"), getDonutCfg(
+                        "累計發電量結構 (億度)", [7.8, 11.5, 0.5, 2.9, 0.0, 0.3, 0.1], 
+                        ['燃煤','燃氣','燃油','再生能源','核能','抽蓄','儲能'], '億度'
+                    )).render();
+
+                    // 趨勢圖
+                    new ApexCharts(document.querySelector("#evolution-area"), {
+                        series: [
+                            { name: '燃煤 (Coal)', data: [45.4, 46.3, 45.0, 44.8, 42.1, 39.3] },
+                            { name: '燃氣 (Gas)', data: [31.5, 34.6, 35.7, 37.2, 38.8, 42.4] },
+                            { name: '再生能源 (RE)', data: [4.8, 4.9, 5.4, 6.0, 8.6, 11.6] },
+                            { name: '核能 (Nuclear)', data: [12.0, 9.3, 11.2, 9.6, 8.2, 4.7] }
+                        ],
+                        chart: { 
+                            type: 'area', 
+                            height: 450, 
+                            stacked: true, 
+                            toolbar: { show: false },
+                            fontFamily: 'Noto Sans TC'
+                        },
+                        xaxis: { 
+                            categories: ["2016", "2018", "2020", "2021", "2022", "2024實績"], 
+                            axisBorder: { show: false },
+                            labels: { style: { fontWeight: 700, colors: '#64748b' } } 
+                        },
+                        yaxis: { 
+                            max: 100, 
+                            labels: { 
+                                formatter: (v) => v + "%", 
+                                style: { fontWeight: 700, colors: '#64748b' } 
+                            } 
+                        },
+                        colors: [THEME.coal, THEME.gas, THEME.re, THEME.nuke],
+                        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.9 } },
+                        stroke: { width: 3, curve: 'smooth' },
+                        legend: { position: 'top', horizontalAlign: 'right', fontWeight: 800, offsetY: -10 },
+                        grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+                        dataLabels: { enabled: false }
+                    }).render();
+
+                    // 4. 隱藏載入畫面
+                    const loader = document.getElementById('loader');
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 500);
+
+                } catch (e) {
+                    console.error("Chart rendering error:", e);
+                }
+            }, 300);
+        });
+    </script>
+</body>
+</html>

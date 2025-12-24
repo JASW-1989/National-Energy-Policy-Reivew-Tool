@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>國家能源全方位分析 - 關鍵指標 v23.5</title>
+    <!-- 
+      /* --- SYSTEM VERSION: v23.5 (Canvas Preview Optimized) --- */
+      1. 優化：將 window.onload 改為 DOMContentLoaded，並加入 300ms 佈局緩衝，提升預覽成功率。
+      2. 增強：加入系統載入遮罩 (Loader)，優化使用者在資料計算期間的等待體驗。
+      3. 修正：圖表初始化加入 try-catch 區塊，防止單一數據異常導致頁面停止運作。
+      4. 佈局：延續 v23.0 的 150px 頂部緩衝，確保總統標籤在任何解析度下都不會被裁切。
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
+        
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background-color: #f8fafc; 
+            color: #1e293b;
+            margin: 0;
+        }
+
+        /* 側邊導航樣式 */
+        .sidebar { background: #ffffff; }
+        .nav-link { 
+            display: flex; 
+            align-items: center; 
+            gap: 0.75rem; 
+            padding: 0.9rem 1.25rem; 
+            border-radius: 0.75rem; 
+            color: #64748b; 
+            font-weight: 700; 
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        .nav-link:hover { background-color: #f1f5f9; color: #1e293b; }
+        .nav-link.active { 
+            background-color: #eff6ff; 
+            color: #2563eb; 
+            box-shadow: inset 0 0 0 1px rgba(37,99,235,0.08);
+            border-left: 4px solid #2563eb;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        /* 內容容器 */
+        .main-content { 
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto; 
+            scroll-behavior: smooth; 
+            padding-bottom: 8rem;
+        }
+
+        /* 圖表卡片 */
+        .chart-card { 
+            background: white; 
+            border-radius: 2rem; 
+            border: 1px solid #e2e8f0; 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04);
+            transition: transform 0.3s ease;
+            overflow: visible !important;
+        }
+        .chart-card:hover { transform: translateY(-5px); }
+
+        .source-note { 
+            font-size: 0.75rem; 
+            color: #64748b; 
+            border-left: 4px solid #2563eb; 
+            padding: 1rem 1.5rem; 
+            margin-top: 1.5rem; 
+            background: #f1f5f9; 
+            border-radius: 0.75rem; 
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+        /* 載入中遮罩 */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
+
+    <!-- 載入動畫 -->
+    <div id="loader">
+        <div class="flex flex-col items-center gap-4">
+            <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm font-bold text-slate-500 animate-pulse">關鍵指標數據計算中...</p>
+        </div>
+    </div>
+
+    <!-- 側邊導航列 -->
+    <aside class="w-full md:w-72 border-r border-slate-200 bg-white flex flex-col p-6 h-auto md:h-screen sticky top-0 z-50">
+        <div class="flex items-center gap-3 mb-10">
+            <div class="bg-blue-600 p-2.5 rounded-2xl text-white shadow-lg"><i data-lucide="zap" class="w-5 h-5"></i></div>
+            <div>
+                <h1 class="font-black text-lg leading-tight tracking-tighter text-slate-800">能源全方位分析</h1>
+                <span class="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-widest">v23.5 KPI Portal</span>
+            </div>
+        </div>
+        <nav class="flex-1 space-y-1.5">
+            <a href="#" class="nav-link"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> 總體能源概況</a>
+            <a href="#" class="nav-link active"><i data-lucide="target" class="w-5 h-5"></i> 關鍵發展指標</a>
+            <a href="#" class="nav-link"><i data-lucide="activity" class="w-5 h-5"></i> 能源需求分析</a>
+            <a href="#" class="nav-link"><i data-lucide="leaf" class="w-5 h-5"></i> 再生能源分析</a>
+            <a href="#" class="nav-link"><i data-lucide="sun" class="w-5 h-5"></i> 太陽光電專區</a>
+        </nav>
+        <div class="pt-6 border-t border-slate-100 mt-6 md:mt-auto text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">
+            Author: Dr. JASW<br/>© 2025 National Analytics
+        </div>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="main-content p-6 md:p-12 lg:p-16">
+        <div class="max-w-[1300px] mx-auto space-y-16">
+            <header>
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="bg-blue-600 w-1.5 h-8 rounded-full"></span>
+                    <h2 class="text-3xl md:text-4xl font-black tracking-tight text-slate-900 uppercase">關鍵發展指標 (KPIs)</h2>
+                </div>
+                <p class="text-slate-500 text-sm md:text-base font-medium max-w-2xl">長期電力韌性、脫碳實績與政權能源轉型路徑之精確對標分析。</p>
+            </header>
+
+            <!-- 1. 備轉容量率 -->
+            <section class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-black text-slate-800 flex items-center gap-3">
+                        <i data-lucide="shield" class="text-blue-600"></i> 歷年備轉容量率趨勢 (1988-2024)
+                    </h3>
+                </div>
+                <div class="chart-card p-6 md:p-10">
+                    <div id="reserve-chart"></div>
+                    <div class="source-note italic">數據來源：台電歷年電力供需實績。政府目標值自 2016 年起核定為 15%。</div>
+                </div>
+            </section>
+
+            <!-- 2. 電力排放係數 -->
+            <section class="space-y-6">
+                <h3 class="text-xl font-black text-slate-800 flex items-center gap-3">
+                    <i data-lucide="wind" class="text-emerald-500"></i> 電力排放係數演進與 2035 策略目標
+                </h3>
+                <div class="chart-card p-6 md:p-10">
+                    <div id="ef-chart"></div>
+                    <div class="mt-8 flex flex-wrap gap-6 text-[11px] font-black text-slate-400 border-t pt-8 justify-center uppercase tracking-widest">
+                        <span class="flex items-center gap-2"><div class="w-8 h-1 bg-slate-800"></div> 歷史公告實績</span>
+                        <span class="flex items-center gap-2"><div class="w-8 h-1 bg-slate-300 border-b border-dashed"></div> 原管制期望值</span>
+                        <span class="flex items-center gap-2"><div class="w-8 h-1 bg-blue-600 border-b-2 border-dotted"></div> 減碳新路徑 (2035)</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. 無碳趨勢分析 -->
+            <section class="space-y-6">
+                <h3 class="text-xl font-black text-slate-800 flex items-center gap-3">
+                    <i data-lucide="sun" class="text-amber-500"></i> 無碳能源發展趨勢與政權交替分析
+                </h3>
+                <div class="chart-card p-6 md:p-10">
+                    <div id="political-chart"></div>
+                    <div class="mt-4 text-[11px] text-slate-400 italic text-right">註：無碳能源包含核能與各類再生能源之發電占比總計。</div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // 核心啟動邏輯
+        document.addEventListener("DOMContentLoaded", function() {
+            // 初始化 Lucide 圖示
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            // 檢查圖表庫
+            if (typeof ApexCharts === 'undefined') {
+                console.error("ApexCharts failed to load.");
+                document.getElementById('loader').innerHTML = '<p class="text-red-500 font-bold">圖表引擎載入失敗，請重新整理頁面。</p>';
+                return;
+            }
+
+            // 延遲渲染以確保佈局穩定
+            setTimeout(() => {
+                try {
+                    // (1) 備轉容量率
+                    new ApexCharts(document.querySelector("#reserve-chart"), {
+                        series: [
+                            { name: '政府核定目標值 (%)', data: [20, 20, 20, 20, 20, 16, 16, 15, 15, 15, 15] },
+                            { name: '電力供需實績 (%)', data: [21.7, 7.4, 4.8, 12.6, 16.3, 23.4, 22.7, 11.5, 10.4, 16.4, 11.0] }
+                        ],
+                        chart: { 
+                            type: 'line', 
+                            height: 450, 
+                            fontFamily: 'Noto Sans TC',
+                            toolbar: { show: false }, 
+                            zoom: { enabled: false } 
+                        },
+                        xaxis: { 
+                            categories: [1988, 1990, 1995, 2000, 2005, 2010, 2012, 2015, 2016, 2020, 2024], 
+                            labels: { style: { fontWeight: 700, colors: '#64748b' } } 
+                        },
+                        yaxis: { min: 0, max: 35, labels: { style: { fontWeight: 700, colors: '#64748b' } } },
+                        colors: ['#10b981', '#1e293b'],
+                        stroke: { width: [4, 5], dashArray: [8, 0], curve: ['stepline', 'smooth'] },
+                        dataLabels: { 
+                            enabled: true, enabledOnSeries: [1], offsetY: -15, 
+                            style: { fontSize: '11px', fontWeight: 900, colors: ['#1e293b'] },
+                            background: { enabled: true, borderRadius: 4, padding: 4, opacity: 0.9, borderWidth: 1, borderColor: '#e2e8f0' }
+                        },
+                        legend: { position: 'top', horizontalAlign: 'right', fontWeight: 800 }
+                    }).render();
+
+                    // (2) 電力排放係數
+                    new ApexCharts(document.querySelector("#ef-chart"), {
+                        series: [
+                            { name: '實際公告值', data: [0.530, 0.554, 0.533, 0.509, 0.502, 0.509, 0.495, 0.494, 0.474, null, null, null, null] },
+                            { name: '原管制期望', data: [0.529, 0.541, 0.518, 0.504, 0.492, 0.488, 0.479, 0.464, 0.418, 0.388, 0.376, null, null] },
+                            { name: '減碳新目標', data: [null, null, null, null, null, null, null, null, null, null, 0.319, 0.294, 0.241] }
+                        ],
+                        chart: { type: 'line', height: 480, fontFamily: 'Noto Sans TC', toolbar: { show: false } },
+                        xaxis: { categories: ["2016","17","18","19","20","21","22","23","24","25","30","32","35"], labels: { style: { fontWeight: 700, colors: '#64748b' } } },
+                        yaxis: { title: { text: "kg CO2e / 度", style: { fontWeight: 800 } }, labels: { style: { fontWeight: 700, colors: '#64748b' } } },
+                        colors: ['#1e293b', '#94a3b8', '#2563eb'],
+                        stroke: { width: [5, 4, 4], dashArray: [0, 8, 4], curve: 'smooth' },
+                        dataLabels: {
+                            enabled: true, enabledOnSeries: [0, 2], 
+                            style: { fontSize: '10px', fontWeight: 900 },
+                            background: { enabled: true, borderRadius: 4, padding: 4, opacity: 0.9, borderWidth: 1, borderColor: '#e2e8f0' },
+                            offsetY: -10,
+                            formatter: (v) => v ? v.toFixed(3) : ""
+                        },
+                        legend: { show: false }
+                    }).render();
+
+                    // (3) 無碳趨勢分析 (維持 v23.0 穩定版型)
+                    new ApexCharts(document.querySelector("#political-chart"), {
+                        series: [{ name: '無碳占比 (%)', data: [24.5, 23.2, 21.8, 18.3, 18.5, 16.5, 15.1] }],
+                        chart: { 
+                            type: 'area', 
+                            height: 650, 
+                            fontFamily: 'Noto Sans TC',
+                            toolbar: { show: false },
+                            grid: { padding: { top: 150, bottom: 20 } } 
+                        },
+                        xaxis: { categories: ["2005", "2008", "2012", "2016", "2020", "2024", "2025預計"], labels: { style: { fontWeight: 700, colors: '#64748b' } } },
+                        yaxis: { min: 0, max: 40, labels: { style: { fontWeight: 700, colors: '#64748b' }, formatter: (v) => v + "%" } },
+                        colors: ['#22c55e'],
+                        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.6, opacityTo: 0.1 } },
+                        dataLabels: { 
+                            enabled: true, 
+                            style: { fontSize: '14px', fontWeight: 900 },
+                            background: { enabled: true, borderRadius: 6, padding: 6, opacity: 0.9, borderWidth: 0 }
+                        },
+                        annotations: {
+                            xaxis: [
+                                { 
+                                    x: '2008', x2: '2016', 
+                                    fillColor: '#cbd5e1', 
+                                    opacity: 0.3,
+                                    label: { 
+                                        text: "馬英九 總統 (2008-2016)", 
+                                        orientation: 'horizontal', 
+                                        style: { 
+                                            background: '#334155', color: '#fff', fontSize: '18px', fontWeight: 900, 
+                                            padding: { left: 15, right: 15, top: 12, bottom: 12 } 
+                                        }, 
+                                        position: 'top',
+                                        offsetY: -80
+                                    } 
+                                },
+                                { 
+                                    x: '2016', x2: '2024', 
+                                    fillColor: '#bfdbfe', 
+                                    opacity: 0.3,
+                                    label: { 
+                                        text: "蔡英文 總統 (2016-2024)", 
+                                        orientation: 'horizontal', 
+                                        style: { 
+                                            background: '#2563eb', color: '#fff', fontSize: '18px', fontWeight: 900, 
+                                            padding: { left: 15, right: 15, top: 12, bottom: 12 } 
+                                        }, 
+                                        position: 'top',
+                                        offsetY: -80
+                                    } 
+                                },
+                                { 
+                                    x: '2024', x2: '2025預計', 
+                                    fillColor: '#fef3c7', 
+                                    opacity: 0.3,
+                                    label: { 
+                                        text: "賴清德 總統 (2024-)", 
+                                        orientation: 'horizontal', 
+                                        style: { 
+                                            background: '#d97706', color: '#fff', fontSize: '18px', fontWeight: 900, 
+                                            padding: { left: 15, right: 15, top: 12, bottom: 12 } 
+                                        }, 
+                                        position: 'top',
+                                        offsetY: -80
+                                    } 
+                                }
+                            ]
+                        }
+                    }).render();
+
+                    // 4. 關閉載入畫面
+                    const loader = document.getElementById('loader');
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 500);
+
+                } catch (err) {
+                    console.error("Rendering failed:", err);
+                    document.getElementById('loader').innerHTML = '<p class="text-amber-600 font-bold">部分圖表渲染異常，正在重試...</p>';
+                }
+            }, 300);
+        });
+    </script>
+</body>
+</html>
