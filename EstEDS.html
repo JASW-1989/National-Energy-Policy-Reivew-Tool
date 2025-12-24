@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2050 能源路徑與供需推估模型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .card { background: white; border-radius: 1rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        input[type="number"] { font-family: ui-monospace, monospace; }
+        .active-tab { background-color: #3b82f6 !important; color: white !important; }
+        .chart-container { position: relative; width: 100%; }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-slate-800">
+    <div class="max-w-[1400px] mx-auto">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">2050 能源轉型路徑推估工具</h1>
+            <p class="text-slate-500 mt-2 text-sm md:text-base">數據基礎：2024年底實績 | 未來規劃：依據提供之電源供給規劃與能源政策方向</p>
+        </header>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+            <!-- Left: Inputs -->
+            <div class="xl:col-span-7 space-y-6">
+                <!-- Demand Side -->
+                <div class="card p-6 border-t-4 border-t-orange-500">
+                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <span class="text-orange-500">🏢</span> 需求端：長期成長設定
+                    </h2>
+                    <div class="flex items-center gap-6 bg-orange-50 p-4 rounded-xl">
+                        <div class="flex-1">
+                            <label class="block text-sm font-semibold text-orange-800 mb-1">年均用電成長率 (%)</label>
+                            <input type="range" id="growthRange" min="0" max="5" step="0.1" value="2.5" oninput="syncGrowth(this.value)" class="w-full accent-orange-600">
+                        </div>
+                        <div class="text-center">
+                            <input type="number" id="growthRate" value="2.5" step="0.1" oninput="syncGrowth(this.value)" class="w-20 border-2 border-orange-200 rounded-lg p-2 text-xl font-bold text-orange-600 focus:border-orange-500 outline-none">
+                        </div>
+                        <div class="hidden md:block text-xs text-orange-700/60 leading-tight">
+                            基期(2024)：282 TWh<br>計算方式：複利成長
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Supply Side Table -->
+                <div class="card p-6 border-t-4 border-t-blue-500">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <h2 class="text-lg font-bold flex items-center gap-2">
+                            <span class="text-blue-500">⚡</span> 供給端：分階段裝置容量 (GW)
+                        </h2>
+                        <button onclick="addRow()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm transition-all flex items-center gap-1">
+                            <span>+</span> 新增能源
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse" id="energyTable">
+                            <thead>
+                                <tr class="text-slate-400 text-[10px] uppercase tracking-widest border-b border-slate-100">
+                                    <th class="pb-3 font-semibold pr-2">能源類別</th>
+                                    <th class="pb-3 font-semibold text-center w-16 px-1">CF(%)</th>
+                                    <th class="pb-3 font-semibold text-center px-1 bg-blue-50/50 rounded-t-lg">2026</th>
+                                    <th class="pb-3 font-semibold text-center px-1 bg-blue-50/50">2030</th>
+                                    <th class="pb-3 font-semibold text-center px-1 bg-blue-50/50">2035</th>
+                                    <th class="pb-3 font-semibold text-center px-1 bg-blue-50/50 rounded-t-lg">2050</th>
+                                    <th class="pb-3 w-8"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50 text-[13px]">
+                                <!-- 燃氣：依據規劃 JSON 累加計算 -->
+                                <tr class="energy-row">
+                                    <td class="py-2 pr-2 font-semibold text-slate-700">燃氣發電 (LNG)</td>
+                                    <td><input type="number" value="66.58" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
+                                    <td class="px-1"><input type="number" value="24.99" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="31.18" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="33.77" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="35.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold text-blue-700"></td>
+                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
+                                </tr>
+                                <tr class="energy-row">
+                                    <td class="py-2 pr-2 font-semibold text-slate-700">燃煤發電 (Coal)</td>
+                                    <td><input type="number" value="66.82" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
+                                    <td class="px-1"><input type="number" value="18.00" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="12.00" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="5.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="0.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold text-blue-700"></td>
+                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
+                                </tr>
+                                <tr class="energy-row">
+                                    <td class="py-2 pr-2 font-semibold text-slate-700">太陽光電 (PV)</td>
+                                    <td><input type="number" value="13.54" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
+                                    <td class="px-1"><input type="number" value="18.50" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5 text-green-600"></td>
+                                    <td class="px-1"><input type="number" value="30.00" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5 text-green-600"></td>
+                                    <td class="px-1"><input type="number" value="50.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5 text-green-600"></td>
+                                    <td class="px-1"><input type="number" value="80.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold text-green-700 bg-green-50"></td>
+                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
+                                </tr>
+                                <tr class="energy-row">
+                                    <td class="py-2 pr-2 font-semibold text-slate-700">離岸風電</td>
+                                    <td><input type="number" value="38.97" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
+                                    <td class="px-1"><input type="number" value="5.60" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5 text-green-600"></td>
+                                    <td class="px-1"><input type="number" value="13.10" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5 text-green-600"></td>
+                                    <td class="px-1"><input type="number" value="20.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5 text-green-600"></td>
+                                    <td class="px-1"><input type="number" value="40.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold text-green-700 bg-green-50"></td>
+                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
+                                </tr>
+                                <tr class="energy-row">
+                                    <td class="py-2 pr-2 font-semibold text-slate-700">抽蓄水力</td>
+                                    <td><input type="number" value="13.61" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
+                                    <td class="px-1"><input type="number" value="2.60" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="2.60" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="3.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="4.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold"></td>
+                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
+                                </tr>
+                                <tr class="energy-row">
+                                    <td class="py-2 pr-2 font-semibold text-slate-700">儲能 (Storage)</td>
+                                    <td><input type="number" value="5.00" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
+                                    <td class="px-1"><input type="number" value="1.00" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5 text-indigo-600"></td>
+                                    <td class="px-1"><input type="number" value="3.00" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5 text-indigo-600"></td>
+                                    <td class="px-1"><input type="number" value="6.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5 text-indigo-600"></td>
+                                    <td class="px-1"><input type="number" value="15.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold text-indigo-700 bg-indigo-50"></td>
+                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
+                                </tr>
+                                <tr class="energy-row">
+                                    <td class="py-2 pr-2 font-semibold text-slate-700">核能</td>
+                                    <td><input type="number" value="90.74" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
+                                    <td class="px-1"><input type="number" value="0.00" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="0.00" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="0.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="0.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold"></td>
+                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
+                                </tr>
+                                <tr class="energy-row">
+                                    <td class="py-2 pr-2 font-semibold text-slate-700">慣常水力</td>
+                                    <td><input type="number" value="22.27" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
+                                    <td class="px-1"><input type="number" value="2.12" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="2.50" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="3.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="4.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold"></td>
+                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
+                                </tr>
+                                <tr class="energy-row">
+                                    <td class="py-2 pr-2 font-semibold text-slate-700">廢棄物/生質能</td>
+                                    <td><input type="number" value="63.95" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
+                                    <td class="px-1"><input type="number" value="0.70" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="1.20" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="2.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
+                                    <td class="px-1"><input type="number" value="5.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold"></td>
+                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Analysis Charts -->
+            <div class="xl:col-span-5 space-y-6">
+                <!-- Chart 1: Trend Bar -->
+                <div class="card p-6">
+                    <h2 class="text-lg font-bold text-slate-700 mb-6 flex justify-between items-center">
+                        供需平衡路徑 (TWh)
+                        <span class="text-[10px] font-normal text-slate-400 border border-slate-200 px-2 py-1 rounded">2026 - 2050</span>
+                    </h2>
+                    <div class="chart-container h-80">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Mix Doughnut with Tabs -->
+                <div class="card p-6">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                        <h2 class="text-lg font-bold text-slate-700">發電配比分析 (%)</h2>
+                        <div class="flex bg-slate-100 p-1 rounded-lg">
+                            <button onclick="changeMixYear(2026)" class="mix-tab active-tab px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all" id="tab2026">2026</button>
+                            <button onclick="changeMixYear(2030)" class="mix-tab px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all" id="tab2030">2030</button>
+                            <button onclick="changeMixYear(2035)" class="mix-tab px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all" id="tab2035">2035</button>
+                            <button onclick="changeMixYear(2050)" class="mix-tab px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all" id="tab2050">2050</button>
+                        </div>
+                    </div>
+                    <div class="chart-container h-96">
+                        <canvas id="mixChart"></canvas>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-slate-50 text-center">
+                        <p class="text-xs text-slate-400 font-medium tracking-wide">
+                            <span id="displayYearText">2026</span> 年度總供給：<span id="displayYearGen" class="text-blue-600 font-bold">0</span> TWh
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="mt-12 text-center text-slate-400 text-xs py-8 border-t border-slate-200">
+            © 能源配比路徑模擬工具 | 基期：2024 (282 TWh) | 包含抽蓄水力與儲能調度考量
+        </footer>
+    </div>
+
+    <script>
+        // 註冊數據標籤插件
+        Chart.register(ChartDataLabels);
+
+        // 自定義插件：在圓餅圖中間顯示文字
+        const centerTextPlugin = {
+            id: 'centerText',
+            afterDraw: (chart) => {
+                if (chart.config.type !== 'doughnut') return;
+                const { ctx, chartArea: { top, bottom, left, right, width, height } } = chart;
+                ctx.save();
+                
+                const renewablePercent = chart.config.options.renewableValue || 0;
+                const centerX = (left + right) / 2;
+                const centerY = (top + bottom) / 2;
+
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                ctx.font = 'bold 12px Inter, "Microsoft JhengHei"';
+                ctx.fillStyle = '#64748b';
+                ctx.fillText('再生能源佔比', centerX, centerY - 12);
+
+                ctx.font = 'bold 24px Inter, "Microsoft JhengHei"';
+                ctx.fillStyle = '#10b981';
+                ctx.fillText(renewablePercent + '%', centerX, centerY + 12);
+                
+                ctx.restore();
+            }
+        };
+        Chart.register(centerTextPlugin);
+
+        let trendChart, mixChart;
+        let currentMixYear = 2026;
+        const baseDemand = 282;
+        const targetYears = [2026, 2030, 2035, 2050];
+        
+        let annualData = {
+            2026: { labels: [], gens: [], total: 0, renewableTotal: 0 },
+            2030: { labels: [], gens: [], total: 0, renewableTotal: 0 },
+            2035: { labels: [], gens: [], total: 0, renewableTotal: 0 },
+            2050: { labels: [], gens: [], total: 0, renewableTotal: 0 }
+        };
+
+        function initCharts() {
+            const ctxTrend = document.getElementById('trendChart').getContext('2d');
+            trendChart = new Chart(ctxTrend, {
+                type: 'bar',
+                data: {
+                    labels: targetYears.map(y => y + '年'),
+                    datasets: [
+                        { label: '預估總供給 (TWh)', data: [], backgroundColor: '#3b82f6', borderRadius: 4 },
+                        { label: '預估總需求 (TWh)', data: [], backgroundColor: '#f97316', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 30 } },
+                    scales: { 
+                        y: { beginAtZero: true, grid: { borderDash: [5, 5], color: '#e2e8f0' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11, weight: '600' } } },
+                        datalabels: {
+                            anchor: 'end', align: 'top', color: '#475569',
+                            font: { size: 10, weight: 'bold' },
+                            formatter: (value) => Math.round(value)
+                        },
+                        centerText: false
+                    }
+                }
+            });
+
+            const ctxMix = document.getElementById('mixChart').getContext('2d');
+            mixChart = new Chart(ctxMix, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: ['#3b82f6', '#64748b', '#fbbf24', '#06b6d4', '#10b981', '#6366f1', '#f43f5e', '#f59e0b', '#14b8a6', '#8b5cf6'],
+                        borderWidth: 2, borderColor: '#ffffff', hoverOffset: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: 45 },
+                    renewableValue: 0,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true },
+                        datalabels: {
+                            color: '#334155', anchor: 'end', align: 'end', offset: 10,
+                            font: { size: 10, weight: '600' },
+                            display: (context) => context.dataset.data[context.dataIndex] > 1 ? 'auto' : false,
+                            formatter: (value, context) => {
+                                const label = context.chart.data.labels[context.dataIndex];
+                                return `${label}\n${value}%`;
+                            },
+                            textAlign: 'center', padding: 4
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        function isRenewable(name) {
+            const keywords = ['太陽', '風', '水', '廢棄物', '生質', '地熱', 'PV', '儲能'];
+            return keywords.some(key => name.includes(key));
+        }
+
+        function syncGrowth(val) {
+            document.getElementById('growthRange').value = val;
+            document.getElementById('growthRate').value = val;
+            calculate();
+        }
+
+        function changeMixYear(year) {
+            currentMixYear = year;
+            document.querySelectorAll('.mix-tab').forEach(t => t.classList.remove('active-tab'));
+            document.getElementById('tab' + year).classList.add('active-tab');
+            updateMixChartDisplay();
+        }
+
+        function calculate() {
+            const rows = document.querySelectorAll('.energy-row');
+            const rate = parseFloat(document.getElementById('growthRate').value) || 0;
+            
+            targetYears.forEach(y => {
+                annualData[y] = { labels: [], gens: [], total: 0, renewableTotal: 0 };
+            });
+
+            rows.forEach(row => {
+                const nameTd = row.querySelector('td:first-child');
+                const name = nameTd ? nameTd.innerText : "未知";
+                const cf = parseFloat(row.querySelector('.cf-input').value) || 0;
+
+                targetYears.forEach(year => {
+                    const capInput = row.querySelector('.cap-' + year);
+                    const cap = capInput ? parseFloat(capInput.value) || 0 : 0;
+                    // TWh = GW * 8760h * CF / 1000
+                    const gen = (cap * 8760 * (cf / 100)) / 1000;
+                    
+                    annualData[year].labels.push(name);
+                    annualData[year].gens.push(gen);
+                    annualData[year].total += gen;
+                    if (isRenewable(name)) {
+                        annualData[year].renewableTotal += gen;
+                    }
+                });
+            });
+
+            const demandPoints = targetYears.map(year => {
+                return baseDemand * Math.pow(1 + (rate / 100), year - 2024);
+            });
+
+            trendChart.data.datasets[0].data = targetYears.map(y => annualData[y].total);
+            trendChart.data.datasets[1].data = demandPoints;
+            trendChart.update();
+
+            updateMixChartDisplay();
+        }
+
+        function updateMixChartDisplay() {
+            const data = annualData[currentMixYear];
+            const percentages = data.gens.map(g => data.total > 0 ? parseFloat(((g / data.total) * 100).toFixed(1)) : 0);
+            const renewablePercent = data.total > 0 ? ((data.renewableTotal / data.total) * 100).toFixed(1) : 0;
+            
+            mixChart.data.labels = data.labels;
+            mixChart.data.datasets[0].data = percentages;
+            mixChart.options.renewableValue = renewablePercent;
+            mixChart.update();
+
+            document.getElementById('displayYearText').innerText = currentMixYear;
+            document.getElementById('displayYearGen').innerText = data.total.toFixed(1);
+        }
+
+        function addRow() {
+            const tbody = document.querySelector('#energyTable tbody');
+            const newRow = document.createElement('tr');
+            newRow.className = 'energy-row';
+            newRow.innerHTML = `
+                <td class="py-2 pr-2 font-semibold text-slate-700"><input type="text" value="新能源" class="bg-transparent border-none p-0 w-full"></td>
+                <td><input type="number" value="30" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
+                <td class="px-1"><input type="number" value="1.00" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
+                <td class="px-1"><input type="number" value="2.00" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
+                <td class="px-1"><input type="number" value="3.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
+                <td class="px-1"><input type="number" value="5.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold"></td>
+                <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
+            `;
+            tbody.appendChild(newRow);
+            calculate();
+        }
+
+        function deleteRow(btn) {
+            btn.closest('tr').remove();
+            calculate();
+        }
+
+        window.onload = function() {
+            initCharts();
+            calculate();
+        };
+    </script>
+</body>
+</html>
