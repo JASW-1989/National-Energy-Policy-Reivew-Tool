@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國家能源全方位分析系統 - v22.0 Responsive Portal</title>
+    <title>國家能源全方位分析系統 - v22.1 Responsive Portal</title>
     <!-- 
-      /* --- SYSTEM ARCHITECTURE: v22.0 (Mobile Responsive & Collapsible) --- */
-      1. 響應式設計：新增手機端漢堡選單與抽屜式導航。
-      2. 縮排機制：桌面端側邊欄支援「展開/收合」模式，優化 iframe 展示空間。
-      3. 互動邏輯：使用 JavaScript 控制側邊欄狀態，並同步優化載入遮罩。
+      /* --- SYSTEM ARCHITECTURE: v22.1 (Fluid Content Fix) --- */
+      1. 修復：解決手機版側邊欄隱藏時，右側內容區無法自動填滿 100% 寬度的問題。
+      2. 佈局：將手機版側邊欄設為真正脫離流量 (Width: 0)，確保 flex-1 內容區自動擴張。
+      3. 互動：優化桌面端縮排與手機端切換的視覺連貫性。
     -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -21,33 +21,41 @@
             color: #1e293b;
             margin: 0;
             overflow: hidden;
+            display: flex;
         }
 
-        /* 側邊欄過渡動畫 */
+        /* 側邊欄基礎樣式 */
         .sidebar { 
             background: #ffffff; 
             border-right: 1px solid #e2e8f0; 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 100;
+            flex-shrink: 0; /* 防止側邊欄被擠壓 */
         }
 
-        /* 桌面端展開/收合寬度 */
+        /* 桌面端寬度控制 */
         .sidebar-expanded { width: 280px; }
         .sidebar-collapsed { width: 80px; }
 
-        /* 手機端抽屜樣式 */
+        /* 手機端關鍵修復：抽屜式導航不應佔據佈局寬度 */
         @media (max-width: 768px) {
             .sidebar {
                 position: fixed;
                 height: 100vh;
-                width: 280px;
+                width: 280px; /* 抽屜開啟時的寬度 */
                 transform: translateX(-100%);
+                /* 在手機版，我們讓 aside 標籤本身不佔據 flex 寬度 */
+                margin-right: -280px; 
             }
             .sidebar.mobile-open {
                 transform: translateX(0);
                 box-shadow: 20px 0 50px rgba(0,0,0,0.15);
+                margin-right: 0;
             }
-            .content-container { margin-left: 0 !important; }
+            .content-container { 
+                width: 100% !important;
+                flex: none !important; 
+            }
         }
 
         .nav-link { 
@@ -91,9 +99,10 @@
             background: #f1f5f9;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
-        /* 手機端頂部欄 */
+        /* 手機端頂部導航列 */
         .mobile-header {
             display: none;
             height: 60px;
@@ -102,6 +111,7 @@
             padding: 0 1rem;
             align-items: center;
             justify-content: space-between;
+            flex-shrink: 0;
         }
         @media (max-width: 768px) { .mobile-header { display: flex; } }
 
@@ -115,7 +125,7 @@
         #page-loader {
             position: absolute;
             inset: 0;
-            top: 60px; /* 避開手機頂部欄 */
+            top: 0;
             background: #ffffff;
             display: flex;
             flex-direction: column;
@@ -124,7 +134,6 @@
             z-index: 40;
             transition: opacity 0.3s ease;
         }
-        @media (min-width: 769px) { #page-loader { top: 0; } }
 
         .loader-spinner {
             width: 32px;
@@ -137,12 +146,12 @@
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* 遮罩背景 (手機端側欄開啟時) */
+        /* 背景遮罩 */
         .backdrop {
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.5);
-            backdrop-filter: blur(4px);
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(2px);
             z-index: 90;
             opacity: 0;
             pointer-events: none;
@@ -153,10 +162,10 @@
 </head>
 <body class="flex">
 
-    <!-- 手機端背景遮罩 -->
+    <!-- 背景遮罩 -->
     <div id="backdrop" class="backdrop" onclick="toggleSidebar()"></div>
 
-    <!-- 響應式側邊導航 -->
+    <!-- 側邊導航 -->
     <aside id="sidebar" class="sidebar sidebar-expanded flex flex-col p-4 h-screen sticky top-0">
         <div class="flex items-center justify-between mb-8 px-2">
             <div class="flex items-center gap-3 overflow-hidden">
@@ -165,7 +174,7 @@
                 </div>
                 <div class="logo-text transition-opacity duration-300">
                     <h1 class="font-black text-base leading-tight tracking-tight text-slate-800">能源分析系統</h1>
-                    <span class="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded uppercase font-black text-[8px]">v22.0 Portal</span>
+                    <span class="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded uppercase font-black text-[8px]">v22.1 Portal</span>
                 </div>
             </div>
             <!-- 桌面端切換鈕 -->
@@ -175,14 +184,14 @@
         </div>
         
         <nav id="master-nav" class="flex-1 space-y-1">
-            <!-- 導航項目 -->
+            <!-- 導航項目動態載入 -->
         </nav>
 
         <div class="pt-6 border-t border-slate-100 mt-auto footer-text transition-opacity duration-300">
             <div class="bg-slate-50 p-3 rounded-xl mb-4 text-center">
                 <p class="text-[9px] font-black text-emerald-600 flex items-center justify-center gap-1.5 uppercase">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Cloud Online
+                    Cloud Connected
                 </p>
             </div>
             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-relaxed text-center">
@@ -191,14 +200,14 @@
         </div>
     </aside>
 
+    <!-- 內容主體區 -->
     <main class="content-container">
-        <!-- 手機端頂部導航 -->
         <header class="mobile-header">
             <button onclick="toggleSidebar()" class="p-2 text-slate-600">
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
             <h2 class="font-bold text-slate-800 text-sm">能源分析主控台</h2>
-            <div class="w-10"></div> <!-- 保持平衡 -->
+            <div class="w-10"></div>
         </header>
 
         <div id="page-loader">
@@ -228,13 +237,11 @@
         let currentActive = 'overview';
         let isCollapsed = false;
 
-        // 手機端選單切換
         function toggleSidebar() {
             sidebar.classList.toggle('mobile-open');
             backdrop.classList.toggle('active');
         }
 
-        // 桌面端縮排切換
         function toggleCollapse() {
             isCollapsed = !isCollapsed;
             if (isCollapsed) {
@@ -258,7 +265,6 @@
             
             renderNav();
 
-            // 若在手機端，選擇後自動收起選單
             if (window.innerWidth <= 768) {
                 sidebar.classList.remove('mobile-open');
                 backdrop.classList.remove('active');
