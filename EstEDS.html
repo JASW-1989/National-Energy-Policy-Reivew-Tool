@@ -26,22 +26,24 @@
 
         <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
             <!-- Left: Inputs -->
-            <div class="xl:col-span-7 space-y-6">
-                <!-- Demand Side -->
-                <div class="card p-6 border-t-4 border-t-orange-500">
-                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-                        <span class="text-orange-500">🏢</span> 需求端：長期成長設定
-                    </h2>
-                    <div class="flex items-center gap-6 bg-orange-50 p-4 rounded-xl">
-                        <div class="flex-1">
-                            <label class="block text-sm font-semibold text-orange-800 mb-1">年均用電成長率 (%)</label>
+            <div class="xl:col-span-7 space-y-4">
+                
+                <!-- Demand Side (Compact Version) -->
+                <div class="card p-4 border-t-4 border-t-orange-500">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-md font-bold flex items-center gap-2">
+                            <span class="text-orange-500 text-sm">🏢</span> 需求端：用電成長設定
+                        </h2>
+                        <span class="text-[10px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded">基期 (2024): 282 TWh</span>
+                    </div>
+                    <div class="flex items-center gap-4 bg-orange-50 p-3 rounded-lg">
+                        <div class="flex-1 flex items-center gap-3">
+                            <span class="text-[11px] font-bold text-orange-800 whitespace-nowrap">年均成長率</span>
                             <input type="range" id="growthRange" min="0" max="5" step="0.1" value="2.5" oninput="syncGrowth(this.value)" class="w-full accent-orange-600">
                         </div>
-                        <div class="text-center">
-                            <input type="number" id="growthRate" value="2.5" step="0.1" oninput="syncGrowth(this.value)" class="w-20 border-2 border-orange-200 rounded-lg p-2 text-xl font-bold text-orange-600 focus:border-orange-500 outline-none">
-                        </div>
-                        <div class="hidden md:block text-xs text-orange-700/60 leading-tight">
-                            基期(2024)：282 TWh<br>計算方式：複利成長
+                        <div class="flex items-center gap-2 border-l border-orange-200 pl-4">
+                            <input type="number" id="growthRate" value="2.5" step="0.1" oninput="syncGrowth(this.value)" class="w-16 border border-orange-200 rounded p-1 text-center text-sm font-bold text-orange-600 focus:border-orange-500 outline-none">
+                            <span class="text-xs font-bold text-orange-800">%</span>
                         </div>
                     </div>
                 </div>
@@ -71,7 +73,6 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-50 text-[13px]">
-                                <!-- 燃氣：依據規劃 JSON 累加計算 -->
                                 <tr class="energy-row">
                                     <td class="py-2 pr-2 font-semibold text-slate-700">燃氣發電 (LNG)</td>
                                     <td><input type="number" value="66.58" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
@@ -106,6 +107,15 @@
                                     <td class="px-1"><input type="number" value="13.10" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5 text-green-600"></td>
                                     <td class="px-1"><input type="number" value="20.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5 text-green-600"></td>
                                     <td class="px-1"><input type="number" value="40.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold text-green-700 bg-green-50"></td>
+                                    <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
+                                </tr>
+                                <tr class="energy-row">
+                                    <td class="py-2 pr-2 font-semibold text-slate-700">地熱 (Geothermal)</td>
+                                    <td><input type="number" value="43.78" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent"></td>
+                                    <td class="px-1"><input type="number" value="0.50" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5 text-green-600"></td>
+                                    <td class="px-1"><input type="number" value="1.20" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5 text-green-600"></td>
+                                    <td class="px-1"><input type="number" value="2.00" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5 text-green-600"></td>
+                                    <td class="px-1"><input type="number" value="5.00" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold text-green-700 bg-green-50"></td>
                                     <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
                                 </tr>
                                 <tr class="energy-row">
@@ -282,7 +292,7 @@
                     labels: [],
                     datasets: [{
                         data: [],
-                        backgroundColor: ['#3b82f6', '#64748b', '#fbbf24', '#06b6d4', '#10b981', '#6366f1', '#f43f5e', '#f59e0b', '#14b8a6', '#8b5cf6'],
+                        backgroundColor: ['#3b82f6', '#64748b', '#fbbf24', '#06b6d4', '#10b981', '#6366f1', '#f43f5e', '#f59e0b', '#14b8a6', '#8b5cf6', '#14b8a6'],
                         borderWidth: 2, borderColor: '#ffffff', hoverOffset: 12
                     }]
                 },
@@ -339,12 +349,12 @@
             rows.forEach(row => {
                 const nameTd = row.querySelector('td:first-child');
                 const name = nameTd ? nameTd.innerText : "未知";
-                const cf = parseFloat(row.querySelector('.cf-input').value) || 0;
+                const cfInput = row.querySelector('.cf-input');
+                const cf = cfInput ? parseFloat(cfInput.value) || 0 : 0;
 
                 targetYears.forEach(year => {
                     const capInput = row.querySelector('.cap-' + year);
                     const cap = capInput ? parseFloat(capInput.value) || 0 : 0;
-                    // TWh = GW * 8760h * CF / 1000
                     const gen = (cap * 8760 * (cf / 100)) / 1000;
                     
                     annualData[year].labels.push(name);
