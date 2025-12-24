@@ -3,29 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>再生能源分析站 v20.5</title>
+    <title>國家能源全方位分析 - 再生能源 v20.19</title>
     <!-- 
-      /* --- SYSTEM VERSION: v20.5 (Canvas Preview Optimized) --- */
-      1. 優化：改用 DOMContentLoaded 並搭配 300ms 緩衝渲染，解決圖表寬度在預覽器中可能壓縮的問題。
-      2. 增強：加入系統載入遮罩 (Loader)，確保外部函式庫載入與數據計算期間視覺的一致性。
-      3. 修正：強化圖表初始化邏輯，加入 try-catch 區塊避免單一渲染錯誤中斷腳本。
-      4. 佈局：優化導覽列連結行為與滾動條設計，提升在單一頁面測試環境下的穩定性。
+      /* --- SYSTEM VERSION: v20.19 (Rigorous Fact & UI Calibration) --- */
+      1. 數據：根據「再生能源裝置容量」實績校對 2015-2024 十年數據。
+      2. 交互：刪除縮放與工具列功能，防止使用者操作失誤。
+      3. 標籤：瀑布圖標籤上挪至 -22px，堆疊圖移除標籤以保持簡潔。
+      4. 配色：瀑布圖採用深綠色系；趨勢圖採用自然性質配色（黃/藍/綠）。
     -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
         
         body { 
             font-family: 'Noto Sans TC', sans-serif; 
             background-color: #f8fafc; 
-            color: #1e293b;
+            color: #1e293b; 
             margin: 0;
+            overflow: hidden;
         }
 
-        /* 側邊欄樣式 */
-        .sidebar { background: #ffffff; }
+        .sidebar { background: #ffffff; border-right: 1px solid #e2e8f0; }
         .nav-link { 
             display: flex; 
             align-items: center; 
@@ -37,45 +37,34 @@
             transition: all 0.2s ease;
             text-decoration: none;
         }
-        .nav-link:hover { 
-            background-color: #f1f5f9; 
-            color: #1e293b; 
-        }
+        .nav-link:hover { background-color: #f1f5f9; color: #1e293b; }
         .nav-link.active { 
             background-color: #eff6ff; 
             color: #2563eb; 
-            border-left: 4px solid #2563eb; 
-            border-top-left-radius: 0; 
-            border-bottom-left-radius: 0; 
+            border-left: 4px solid #2563eb;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
         }
 
-        /* 內容區樣式 */
         .main-content { 
             flex: 1;
             height: 100vh;
             overflow-y: auto; 
             scroll-behavior: smooth; 
-            padding-bottom: 6rem; 
+            padding-bottom: 6rem;
         }
 
-        /* 卡片設計 */
         .chart-card { 
             background: white; 
             border-radius: 1.5rem; 
             border: 1px solid #e2e8f0; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .chart-card:hover { 
-            transform: translateY(-5px);
-            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: visible !important;
         }
 
-        /* 自定義捲軸 */
-        .main-content::-webkit-scrollbar { width: 6px; }
-        .main-content::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-
-        /* 載入中遮罩 */
+        .main-content::-webkit-scrollbar { width: 5px; }
+        .main-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
         #loader {
             position: fixed;
             inset: 0;
@@ -88,195 +77,192 @@
         }
     </style>
 </head>
-<body class="flex flex-col md:flex-row min-h-screen">
+<body class="flex">
 
-    <!-- 載入動畫 -->
     <div id="loader">
         <div class="flex flex-col items-center gap-4">
-            <div class="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-sm font-bold text-slate-500 animate-pulse">綠能發展數據分析中...</p>
+            <div class="w-12 h-12 border-4 border-[#064e3b] border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm font-bold text-slate-500 tracking-widest">數據核校中...</p>
         </div>
     </div>
 
-    <!-- 側邊導覽列 -->
-    <aside class="w-full md:w-72 border-r border-slate-200 bg-white flex flex-col p-6 h-auto md:h-screen sticky top-0 z-50">
+    <aside class="sidebar w-72 h-screen border-r flex flex-col p-6 sticky top-0 z-50">
         <div class="flex items-center gap-3 mb-12">
-            <div class="bg-emerald-600 p-2.5 rounded-2xl text-white shadow-lg">
-                <i data-lucide="leaf" class="w-5 h-5"></i>
+            <div class="bg-[#064e3b] p-2.5 rounded-2xl text-white shadow-lg shadow-emerald-100">
+                <i data-lucide="leaf" class="w-6 h-6 text-emerald-400"></i>
             </div>
             <div>
-                <h1 class="font-black text-lg leading-tight tracking-tighter text-slate-800">能源全方位分析</h1>
-                <span class="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded uppercase tracking-widest">v20.5 Renewable</span>
+                <h1 class="font-black text-lg leading-tight tracking-tighter">再生能源站</h1>
+                <span class="text-[9px] font-black text-[#064e3b] bg-emerald-50 px-2 py-0.5 rounded uppercase tracking-widest">v20.19 CE</span>
             </div>
         </div>
-        <nav class="flex-1 space-y-1.5">
-            <a href="index.html" class="nav-link active"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> 總體能源概況</a>
+        
+        <nav class="flex-1 space-y-2">
+            <a href="index.html" class="nav-link"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> 總體能源概況</a>
             <a href="key_metrics.html" class="nav-link"><i data-lucide="target" class="w-5 h-5"></i> 關鍵發展指標</a>
             <a href="demand_station.html" class="nav-link"><i data-lucide="activity" class="w-5 h-5"></i> 能源需求分析</a>
-            <a href="renewable_station.html" class="nav-link"><i data-lucide="leaf" class="w-5 h-5"></i> 再生能源分析</a>
+            <a href="renewable_station.html" class="nav-link active"><i data-lucide="leaf" class="w-5 h-5"></i> 再生能源分析</a>
             <a href="solar_station.html" class="nav-link"><i data-lucide="sun" class="w-5 h-5"></i> 太陽光電專區</a>
         </nav>
-        <div class="pt-6 border-t border-slate-100 mt-6 md:mt-auto text-[10px] font-black text-slate-400 uppercase text-center tracking-widest leading-relaxed">
-            Author: Dr. JASW<br/>© 2025 National Energy Analytics
+
+        <div class="pt-6 border-t border-slate-100 mt-auto text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
+            Author: Dr. JASW<br/>© 2025 National Energy Report
         </div>
     </aside>
 
-    <!-- 主內容區 -->
-    <main class="main-content p-6 md:p-12 lg:p-16">
-        <div class="max-w-[1200px] mx-auto space-y-12">
-            <header>
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-xs font-bold">能源轉型路徑</span>
+    <main class="main-content p-8 md:p-12 lg:p-16">
+        <div class="max-w-[1100px] mx-auto space-y-16">
+            
+            <header class="space-y-2">
+                <div class="flex items-center gap-2 text-[#064e3b] font-bold text-xs uppercase tracking-widest">
                 </div>
-                <h2 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">再生能源發展分析</h2>
-                <p class="text-slate-500 font-medium mt-2">綠能裝置容量之成長動能與類別配比演進，觀測淨零轉型核心成效。</p>
+                <h2 class="text-4xl font-black tracking-tight text-slate-900 uppercase">再生能源發展分析</h2>
+                <p class="text-slate-500 font-medium">觀測綠能裝置容量之成長動能，解析各再生能源技術自2015年以來之演進</p>
             </header>
 
-            <!-- 瀑布圖：成長貢獻 -->
-            <div class="chart-card p-6 md:p-10">
-                <div id="re-waterfall-chart"></div>
-            </div>
+            <!-- 1. 再生能源成長貢獻 -->
+            <section class="space-y-6">
+                <div class="chart-card p-10">
+                    <div id="re-waterfall-chart"></div>
+                    <div class="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between text-[11px] font-bold text-slate-400">
+                        <span>數據單位：GW (十億瓦)</span>
+                        <span>資料來源：根據實績數據加總</span>
+                    </div>
+                </div>
+            </section>
 
-            <!-- 堆疊圖：歷史趨勢 -->
-            <div class="chart-card p-6 md:p-10">
-                <div id="re-history-chart"></div>
-            </div>
-            
-            <!-- 數據備註 -->
-            <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-xl">
-                <h4 class="font-black text-blue-800 flex items-center gap-2 mb-2">
-                    <i data-lucide="info" class="w-5 h-5"></i> 分析說明
-                </h4>
-                <p class="text-sm text-blue-700 leading-relaxed font-medium">
-                    自 2016 年能源轉型啟動後，再生能源進入爆發式成長期，其中以太陽光電貢獻度最高，離岸風電於 2022 年後開始展現實績。
-                </p>
-            </div>
+            <!-- 2. 再生能源主要類別裝置趨勢 (十年長線，無標籤) -->
+            <section class="space-y-6">
+                <div class="chart-card p-10">
+                    <div id="re-history-chart"></div>
+                </div>
+            </section>
+
         </div>
     </main>
 
     <script>
-        // 定義主題色
-        const THEME = { 
-            coal: '#334155', 
-            solar: '#f97316', 
-            won: '#1d4ed8', 
-            woff: '#06b6d4', 
-            hydro: '#38bdf8', 
-            act: '#1e293b' 
+        // 深綠配色調色盤
+        const DEEP_GREEN = {
+            dark: '#064e3b',
+            medium: '#065f46',
+            base: '#475569',
+            light: '#10b981',
+            accent: '#059669'
+        };
+
+        // 自然性質配色
+        const NATURE_PALETTE = {
+            solar: '#FFB300',     // 太陽金
+            offshore: '#0277BD',  // 離岸藍
+            onshore: '#4FC3F7',   // 陸域天藍
+            hydro: '#2E7D32',     // 水力林綠
+            others: '#94a3b8'     // 其他灰
         };
 
         document.addEventListener("DOMContentLoaded", function() {
-            // 初始化 Lucide 圖示
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+            lucide.createIcons();
 
-            // 檢查 ApexCharts 庫
-            if (typeof ApexCharts === 'undefined') {
-                console.error("ApexCharts failed to load.");
-                document.getElementById('loader').innerHTML = '<p class="text-red-500 font-bold">圖表庫載入錯誤。</p>';
-                return;
-            }
-
-            // 延遲渲染以確保容器寬度計算準確
             setTimeout(() => {
                 try {
-                    // (1) 再生能源裝置容量成長貢獻 (瀑布圖)
+                    // (1) 再生能源成長貢獻瀑布圖 (深綠配色，標籤上挪)
                     new ApexCharts(document.querySelector("#re-waterfall-chart"), {
                         series: [{ 
                             data: [
-                                { x: "2015 總量", y: [0, 4.1], color: THEME.coal }, 
-                                { x: "太陽光電", y: [4.1, 17.6], color: THEME.solar }, 
-                                { x: "離岸風電", y: [17.6, 20.8], color: THEME.woff }, 
-                                { x: "陸域風電", y: [20.8, 21.1], color: THEME.won }, 
-                                { x: "2024 總量", y: [0, 21.3], color: THEME.act }
-                            ] 
+                                { x: "2015 總量", y: [0, 4.1], color: DEEP_GREEN.base },
+                                { x: "太陽光電", y: [4.1, 17.6], color: DEEP_GREEN.dark },
+                                { x: "離岸風電", y: [17.6, 20.8], color: DEEP_GREEN.medium },
+                                { x: "陸域風電", y: [20.8, 21.1], color: DEEP_GREEN.accent },
+                                { x: "其他類別", y: [21.1, 21.3], color: DEEP_GREEN.light },
+                                { x: "2024 總量", y: [0, 21.3], color: DEEP_GREEN.dark }
+                            ]
                         }],
                         chart: { 
                             type: 'rangeBar', 
-                            height: 480, 
+                            height: 500, 
+                            toolbar: { show: false }, 
                             fontFamily: 'Noto Sans TC',
-                            toolbar: { show: false } 
+                            grid: { padding: { top: 30 } } 
                         },
                         title: { 
-                            text: "再生能源裝置容量成長貢獻 (2015-2024 GW)", 
+                            text: "再生能源裝置容量成長貢獻 (2015-2024)", 
                             align: 'left',
-                            style: { fontSize: '20px', fontWeight: 900, color: '#1e293b' } 
+                            style: { fontSize: '20px', fontWeight: 900, color: '#1e293b' }
                         },
                         plotOptions: { 
                             bar: { 
+                                columnWidth: '55%',
                                 borderRadius: 6,
-                                columnWidth: '60%', 
                                 dataLabels: { position: 'top' } 
                             } 
                         },
                         dataLabels: { 
                             enabled: true, 
-                            offsetY: -30, 
-                            style: { fontWeight: 800, colors: ['#475569'] }, 
-                            formatter: (v, o) => o.w.config.series[0].data[o.dataPointIndex].y[1] + " GW"
-                        },
-                        yaxis: {
-                            labels: {
-                                formatter: (val) => val + " GW",
-                                style: { fontWeight: 700 }
+                            offsetY: -22, // 關鍵修正：標籤上挪避免與長條重疊
+                            style: { fontWeight: 900, fontSize: '13px', colors: ['#1e293b'] },
+                            formatter: (v, o) => {
+                                const d = o.w.config.series[0].data[o.dataPointIndex];
+                                const diff = (d.y[1] - d.y[0]).toFixed(1);
+                                if (o.dataPointIndex === 0 || o.dataPointIndex === 5) return d.y[1].toFixed(1);
+                                return (parseFloat(diff) > 0 ? "+" : "") + diff;
                             }
                         },
-                        xaxis: {
-                            labels: { style: { fontWeight: 700 } }
-                        }
+                        xaxis: { 
+                            labels: { style: { fontWeight: 800, color: '#64748b' } },
+                            axisBorder: { show: false }
+                        },
+                        yaxis: { 
+                            title: { text: '裝置容量 (GW)', style: { fontWeight: 800 } },
+                            labels: { style: { fontWeight: 700 } } 
+                        },
+                        grid: { borderColor: '#f1f5f9', strokeDashArray: 4 }
                     }).render();
 
-                    // (2) 再生能源主要類別 10 年裝置發展趨勢 (堆疊柱狀圖)
+                    // (2) 再生能源主要類別裝置量趨勢 (十年長線，性質配色，無標籤，無縮放)
                     new ApexCharts(document.querySelector("#re-history-chart"), {
                         series: [
-                            { name: '太陽光電', data: [0.8, 2.7, 7.7, 14.2] }, 
-                            { name: '陸域風力', data: [0.6, 0.7, 0.8, 1.0] }, 
-                            { name: '離岸風電', data: [0.0, 0.0, 0.2, 3.2] }, 
-                            { name: '慣常水力', data: [2.1, 2.1, 2.1, 2.1] }
+                            { name: '太陽光電', data: [0.8, 1.2, 1.8, 2.7, 4.2, 5.8, 7.7, 9.7, 12.4, 14.2] },
+                            { name: '離岸風電', data: [0.0, 0.0, 0.0, 0.0, 0.1, 0.1, 0.2, 0.5, 1.8, 3.2] },
+                            { name: '陸域風力', data: [0.6, 0.7, 0.7, 0.7, 0.7, 0.8, 0.8, 0.8, 0.9, 1.0] },
+                            { name: '慣常水力', data: [2.1, 2.1, 2.1, 2.1, 2.1, 2.1, 2.1, 2.1, 2.1, 2.1] }
                         ],
                         chart: { 
                             type: 'bar', 
                             height: 480, 
                             stacked: true, 
+                            toolbar: { show: false }, // 徹底移除工具列防止使用者誤觸縮放
                             fontFamily: 'Noto Sans TC',
-                            toolbar: { show: false } 
+                            zoom: { enabled: false } // 禁用縮放
                         },
                         title: { 
-                            text: "再生能源主要類別裝置發展趨勢 (GW)", 
+                            text: "再生能源主要類別裝置量演進趨勢 (2015-2024)", 
                             align: 'left',
-                            style: { fontSize: '20px', fontWeight: 900, color: '#1e293b' } 
+                            style: { fontSize: '20px', fontWeight: 900, color: '#1e293b' }
                         },
                         xaxis: { 
-                            categories: ["2015", "2018", "2021", "2024"], 
-                            labels: { style: { fontWeight: 700, colors: '#64748b' } } 
+                            categories: ["2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024"], 
+                            labels: { style: { fontWeight: 700 } } 
                         },
-                        yaxis: {
-                            labels: { 
-                                formatter: (val) => val + " GW",
-                                style: { fontWeight: 700, colors: '#64748b' } 
-                            }
+                        yaxis: { 
+                            title: { text: '累計裝置容量 (GW)', style: { fontWeight: 800 } },
+                            labels: { style: { fontWeight: 700 } } 
                         },
-                        colors: [THEME.solar, THEME.won, THEME.woff, THEME.hydro],
-                        plotOptions: { bar: { borderRadius: 4, columnWidth: '45%' } },
-                        legend: { 
-                            position: 'top', 
-                            horizontalAlign: 'right',
-                            fontWeight: 700,
-                            markers: { radius: 12 }
-                        },
-                        grid: { borderColor: '#f1f5f9' }
+                        colors: [NATURE_PALETTE.solar, NATURE_PALETTE.offshore, NATURE_PALETTE.onshore, NATURE_PALETTE.hydro],
+                        legend: { position: 'top', horizontalAlign: 'right', fontWeight: 700 },
+                        plotOptions: { bar: { columnWidth: '45%' } },
+                        dataLabels: { enabled: false }, // 移除數據標籤保持簡潔
+                        grid: { borderColor: '#f1f5f9', strokeDashArray: 4 }
                     }).render();
 
-                    // 4. 關閉載入畫面
                     const loader = document.getElementById('loader');
                     loader.style.opacity = '0';
                     setTimeout(() => loader.style.display = 'none', 500);
 
-                } catch (err) {
-                    console.error("Rendering failed:", err);
+                } catch (e) {
+                    console.error("Layout Engine Error:", e);
                 }
-            }, 300);
+            }, 400);
         });
     </script>
 </body>
-
 </html>
