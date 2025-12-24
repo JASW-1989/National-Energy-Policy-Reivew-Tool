@@ -14,47 +14,50 @@
         input[type="number"] { font-family: ui-monospace, monospace; }
         .active-tab { background-color: #3b82f6 !important; color: white !important; }
         .chart-container { position: relative; width: 100%; }
+        /* 自定義滾動條樣式，讓行動裝置體驗更好 */
+        .overflow-x-auto::-webkit-scrollbar { height: 4px; }
+        .overflow-x-auto::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body class="p-4 md:p-8 text-slate-800">
+<body class="p-3 md:p-8 text-slate-800">
     <div class="max-w-[1400px] mx-auto">
         <!-- Header -->
-        <header class="mb-8 text-center">
-            <h1 class="text-3xl font-bold text-slate-900 tracking-tight">2050 能源轉型路徑推估工具</h1>
-            <p class="text-slate-500 mt-2 text-sm md:text-base">數據基礎：2024年底實績 | 未來規劃：依據提供之電源供給規劃與能源政策方向</p>
+        <header class="mb-6 md:mb-8 text-center">
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight px-2">2050 能源轉型路徑推估工具</h1>
+            <p class="text-slate-500 mt-2 text-xs md:text-base px-4">數據基礎：2024年底實績 | 未來規劃：依據提供之電源供給規劃與能源政策方向</p>
             
-            <!-- Data Management Buttons -->
-            <div class="mt-6 flex justify-center gap-3">
-                <button onclick="exportSettings()" class="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-semibold hover:bg-slate-700 transition-all shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <!-- Data Management Buttons (Responsive layout) -->
+            <div class="mt-6 flex flex-wrap justify-center gap-2 md:gap-3 px-4">
+                <button onclick="exportSettings()" class="flex items-center gap-2 px-3 py-2 bg-slate-800 text-white rounded-lg text-xs md:text-sm font-semibold hover:bg-slate-700 transition-all shadow-sm">
+                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                     匯出設定
                 </button>
-                <button onclick="document.getElementById('importFile').click()" class="flex items-center gap-2 px-4 py-2 bg-white text-slate-800 border border-slate-200 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-all shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                <button onclick="document.getElementById('importFile').click()" class="flex items-center gap-2 px-3 py-2 bg-white text-slate-800 border border-slate-200 rounded-lg text-xs md:text-sm font-semibold hover:bg-slate-50 transition-all shadow-sm">
+                    <svg class="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                     匯入設定
                 </button>
                 <input type="file" id="importFile" accept=".json" onchange="importSettings(event)" class="hidden">
             </div>
         </header>
 
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 md:gap-8">
             <!-- Left: Inputs -->
             <div class="xl:col-span-7 space-y-4">
                 
-                <!-- Demand Side (Compact Version) -->
+                <!-- Demand Side (Compact & Responsive) -->
                 <div class="card p-4 border-t-4 border-t-orange-500">
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="text-md font-bold flex items-center gap-2">
-                            <span class="text-orange-500 text-sm">🏢</span> 需求端：用電成長設定
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
+                        <h2 class="text-sm md:text-md font-bold flex items-center gap-2">
+                            <span class="text-orange-500">🏢</span> 需求端：用電成長設定
                         </h2>
                         <span class="text-[10px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded">基期 (2024): 282 TWh</span>
                     </div>
-                    <div class="flex items-center gap-4 bg-orange-50 p-3 rounded-lg">
-                        <div class="flex-1 flex items-center gap-3">
-                            <span class="text-[11px] font-bold text-orange-800 whitespace-nowrap">年均成長率</span>
+                    <div class="flex flex-col sm:flex-row items-center gap-3 bg-orange-50 p-3 rounded-lg">
+                        <div class="flex-1 w-full flex items-center gap-3">
+                            <span class="text-[10px] md:text-[11px] font-bold text-orange-800 whitespace-nowrap">年均成長率</span>
                             <input type="range" id="growthRange" min="0" max="5" step="0.1" value="2.5" oninput="syncGrowth(this.value)" class="w-full accent-orange-600">
                         </div>
-                        <div class="flex items-center gap-2 border-l border-orange-200 pl-4">
+                        <div class="flex items-center gap-2 border-t sm:border-t-0 sm:border-l border-orange-200 pt-2 sm:pt-0 sm:pl-4 w-full sm:w-auto justify-center">
                             <input type="number" id="growthRate" value="2.5" step="0.1" oninput="syncGrowth(this.value)" class="w-16 border border-orange-200 rounded p-1 text-center text-sm font-bold text-orange-600 focus:border-orange-500 outline-none">
                             <span class="text-xs font-bold text-orange-800">%</span>
                         </div>
@@ -62,18 +65,18 @@
                 </div>
 
                 <!-- Supply Side Table -->
-                <div class="card p-6 border-t-4 border-t-blue-500">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                        <h2 class="text-lg font-bold flex items-center gap-2">
-                            <span class="text-blue-500">⚡</span> 供給端：分階段裝置容量 (GW)
+                <div class="card p-4 md:p-6 border-t-4 border-t-blue-500">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                        <h2 class="text-md md:text-lg font-bold flex items-center gap-2">
+                            <span class="text-blue-500">⚡</span> 供給端：各階段裝置容量 (GW)
                         </h2>
-                        <button onclick="addRow()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm transition-all flex items-center gap-1">
+                        <button onclick="addRow()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs md:text-sm transition-all flex items-center gap-1 shadow-sm">
                             <span>+</span> 新增能源
                         </button>
                     </div>
                     
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse" id="energyTable">
+                    <div class="overflow-x-auto -mx-1 px-1">
+                        <table class="w-full text-left border-collapse min-w-[600px]" id="energyTable">
                             <thead>
                                 <tr class="text-slate-400 text-[10px] uppercase tracking-widest border-b border-slate-100">
                                     <th class="pb-3 font-semibold pr-2">能源類別</th>
@@ -85,10 +88,13 @@
                                     <th class="pb-3 w-8"></th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-50 text-[13px]">
-                                <!-- Rows will be populated here -->
+                            <tbody class="divide-y divide-slate-50 text-[12px] md:text-[13px]">
+                                <!-- Rows populate from JS -->
                             </tbody>
                         </table>
+                    </div>
+                    <div class="mt-3 block md:hidden text-[10px] text-slate-400 text-center italic">
+                        ⬅ 左右滑動表格可編輯各年份數據 ➡
                     </div>
                 </div>
             </div>
@@ -96,32 +102,32 @@
             <!-- Right: Analysis Charts -->
             <div class="xl:col-span-5 space-y-6">
                 <!-- Chart 1: Trend Bar -->
-                <div class="card p-6">
-                    <h2 class="text-lg font-bold text-slate-700 mb-6 flex justify-between items-center">
+                <div class="card p-4 md:p-6">
+                    <h2 class="text-md md:text-lg font-bold text-slate-700 mb-6 flex justify-between items-center">
                         供需平衡路徑 (TWh)
-                        <span class="text-[10px] font-normal text-slate-400 border border-slate-200 px-2 py-1 rounded">2026 - 2050</span>
+                        <span class="text-[9px] md:text-[10px] font-normal text-slate-400 border border-slate-200 px-2 py-1 rounded">2026 - 2050</span>
                     </h2>
-                    <div class="chart-container h-80">
+                    <div class="chart-container h-64 md:h-80">
                         <canvas id="trendChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Chart 2: Mix Doughnut with Tabs -->
-                <div class="card p-6">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-                        <h2 class="text-lg font-bold text-slate-700">發電配比分析 (%)</h2>
-                        <div class="flex bg-slate-100 p-1 rounded-lg">
-                            <button onclick="changeMixYear(2026)" class="mix-tab active-tab px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all" id="tab2026">2026</button>
-                            <button onclick="changeMixYear(2030)" class="mix-tab px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all" id="tab2030">2030</button>
-                            <button onclick="changeMixYear(2035)" class="mix-tab px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all" id="tab2035">2035</button>
-                            <button onclick="changeMixYear(2050)" class="mix-tab px-3 py-1 rounded-md text-[10px] font-bold uppercase transition-all" id="tab2050">2050</button>
+                <div class="card p-4 md:p-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+                        <h2 class="text-md md:text-lg font-bold text-slate-700">發電配比分析 (%)</h2>
+                        <div class="flex bg-slate-100 p-1 rounded-lg w-full sm:w-auto">
+                            <button onclick="changeMixYear(2026)" class="mix-tab flex-1 active-tab px-2 md:px-3 py-1 rounded-md text-[9px] md:text-[10px] font-bold uppercase transition-all" id="tab2026">2026</button>
+                            <button onclick="changeMixYear(2030)" class="mix-tab flex-1 px-2 md:px-3 py-1 rounded-md text-[9px] md:text-[10px] font-bold uppercase transition-all" id="tab2030">2030</button>
+                            <button onclick="changeMixYear(2035)" class="mix-tab flex-1 px-2 md:px-3 py-1 rounded-md text-[9px] md:text-[10px] font-bold uppercase transition-all" id="tab2035">2035</button>
+                            <button onclick="changeMixYear(2050)" class="mix-tab flex-1 px-2 md:px-3 py-1 rounded-md text-[9px] md:text-[10px] font-bold uppercase transition-all" id="tab2050">2050</button>
                         </div>
                     </div>
-                    <div class="chart-container h-96">
+                    <div class="chart-container h-80 md:h-96">
                         <canvas id="mixChart"></canvas>
                     </div>
                     <div class="mt-4 pt-4 border-t border-slate-50 text-center">
-                        <p class="text-xs text-slate-400 font-medium tracking-wide">
+                        <p class="text-[10px] md:text-xs text-slate-400 font-medium tracking-wide">
                             <span id="displayYearText">2026</span> 年度總供給：<span id="displayYearGen" class="text-blue-600 font-bold">0</span> TWh
                         </p>
                     </div>
@@ -129,7 +135,7 @@
             </div>
         </div>
         
-        <footer class="mt-12 text-center text-slate-400 text-xs py-8 border-t border-slate-200">
+        <footer class="mt-12 text-center text-slate-400 text-[10px] md:text-xs py-8 border-t border-slate-200">
             © 能源配比路徑模擬工具 | 基期：2024 (282 TWh) | 包含抽蓄水力與儲能調度考量
         </footer>
     </div>
@@ -153,13 +159,18 @@
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 
-                ctx.font = 'bold 12px Inter, "Microsoft JhengHei"';
-                ctx.fillStyle = '#64748b';
-                ctx.fillText('再生能源佔比', centerX, centerY - 12);
+                // 根據容器寬度縮放文字
+                const scaleFactor = width < 250 ? 0.8 : 1;
 
-                ctx.font = 'bold 24px Inter, "Microsoft JhengHei"';
+                // 第一行：標題
+                ctx.font = `bold ${12 * scaleFactor}px Inter, "Microsoft JhengHei"`;
+                ctx.fillStyle = '#64748b';
+                ctx.fillText('再生能源佔比', centerX, centerY - (12 * scaleFactor));
+
+                // 第二行：數值
+                ctx.font = `bold ${24 * scaleFactor}px Inter, "Microsoft JhengHei"`;
                 ctx.fillStyle = '#10b981';
-                ctx.fillText(renewablePercent + '%', centerX, centerY + 12);
+                ctx.fillText(renewablePercent + '%', centerX, centerY + (12 * scaleFactor));
                 
                 ctx.restore();
             }
@@ -212,10 +223,10 @@
                         x: { grid: { display: false } }
                     },
                     plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11, weight: '600' } } },
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, weight: '600' } } },
                         datalabels: {
                             anchor: 'end', align: 'top', color: '#475569',
-                            font: { size: 10, weight: 'bold' },
+                            font: { size: 9, weight: 'bold' },
                             formatter: (value) => Math.round(value)
                         },
                         centerText: false
@@ -237,17 +248,19 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    layout: { padding: 45 },
+                    layout: { padding: 40 },
                     renewableValue: 0,
                     plugins: {
                         legend: { display: false },
                         tooltip: { enabled: true },
                         datalabels: {
-                            color: '#334155', anchor: 'end', align: 'end', offset: 10,
-                            font: { size: 10, weight: '600' },
-                            display: (context) => context.dataset.data[context.dataIndex] > 1 ? 'auto' : false,
+                            color: '#334155', anchor: 'end', align: 'end', offset: 8,
+                            font: { size: 9, weight: '600' },
+                            display: (context) => context.dataset.data[context.dataIndex] > 2 ? 'auto' : false,
                             formatter: (value, context) => {
                                 const label = context.chart.data.labels[context.dataIndex];
+                                // 行動裝置上精簡標籤
+                                if (context.chart.width < 350) return `${value}%`;
                                 return `${label}\n${value}%`;
                             },
                             textAlign: 'center', padding: 4
@@ -334,20 +347,20 @@
             const newRow = document.createElement('tr');
             newRow.className = 'energy-row';
             
-            const name = data ? data.name : "新能源";
+            const name = data ? data.name : "新能源項目";
             const cf = data ? data.cf : 30.00;
             const caps = data ? data.cap : { 2026: 1.00, 2030: 2.00, 2035: 3.00, 2050: 5.00 };
 
             newRow.innerHTML = `
-                <td class="py-2 pr-2 font-semibold text-slate-700">
-                    <input type="text" value="${name}" class="energy-name bg-transparent border-none p-0 w-full outline-none focus:text-blue-600 transition-colors">
+                <td class="py-2 pr-2 font-semibold text-slate-700 min-w-[120px]">
+                    <input type="text" value="${name}" class="energy-name bg-transparent border-none p-0 w-full outline-none focus:text-blue-600 transition-colors text-[12px] md:text-[13px]">
                 </td>
-                <td><input type="number" value="${cf}" step="0.01" oninput="calculate()" class="cf-input w-full text-center bg-transparent outline-none"></td>
-                <td class="px-1"><input type="number" value="${caps[2026]}" step="0.01" oninput="calculate()" class="cap-2026 w-full text-center border rounded p-0.5"></td>
-                <td class="px-1"><input type="number" value="${caps[2030]}" step="0.01" oninput="calculate()" class="cap-2030 w-full text-center border rounded p-0.5"></td>
-                <td class="px-1"><input type="number" value="${caps[2035]}" step="0.01" oninput="calculate()" class="cap-2035 w-full text-center border rounded p-0.5"></td>
-                <td class="px-1"><input type="number" value="${caps[2050]}" step="0.01" oninput="calculate()" class="cap-2050 w-full text-center border rounded p-0.5 font-bold"></td>
-                <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors">✕</button></td>
+                <td class="px-1"><input type="number" value="${cf}" step="0.01" oninput="calculate()" class="cf-input w-12 md:w-full text-center bg-transparent outline-none border-b border-transparent focus:border-blue-200"></td>
+                <td class="px-1"><input type="number" value="${caps[2026]}" step="0.01" oninput="calculate()" class="cap-2026 w-12 md:w-full text-center border rounded p-0.5"></td>
+                <td class="px-1"><input type="number" value="${caps[2030]}" step="0.01" oninput="calculate()" class="cap-2030 w-12 md:w-full text-center border rounded p-0.5"></td>
+                <td class="px-1"><input type="number" value="${caps[2035]}" step="0.01" oninput="calculate()" class="cap-2035 w-12 md:w-full text-center border rounded p-0.5"></td>
+                <td class="px-1"><input type="number" value="${caps[2050]}" step="0.01" oninput="calculate()" class="cap-2050 w-12 md:w-full text-center border rounded p-0.5 font-bold"></td>
+                <td class="text-right"><button onclick="deleteRow(this)" class="text-slate-300 hover:text-red-500 transition-colors px-1">✕</button></td>
             `;
             tbody.appendChild(newRow);
             calculate();
@@ -398,32 +411,23 @@
             reader.onload = function(e) {
                 try {
                     const importedData = JSON.parse(e.target.result);
-                    
-                    // Update Growth Rate
-                    if (importedData.growthRate !== undefined) {
-                        syncGrowth(importedData.growthRate);
-                    }
-
-                    // Update Table
+                    if (importedData.growthRate !== undefined) syncGrowth(importedData.growthRate);
                     if (importedData.energies && Array.isArray(importedData.energies)) {
                         const tbody = document.querySelector('#energyTable tbody');
-                        tbody.innerHTML = ''; // Clear current rows
+                        tbody.innerHTML = '';
                         importedData.energies.forEach(energy => addRow(energy));
                     }
-                    
                     calculate();
                 } catch (err) {
                     alert('匯入檔案格式錯誤，請確保檔案是由此工具導出的 JSON 檔案。');
                 }
             };
             reader.readAsText(file);
-            // Reset file input
             event.target.value = '';
         }
 
         window.onload = function() {
             initCharts();
-            // Initialize with default data
             defaultEnergies.forEach(energy => addRow(energy));
         };
     </script>
