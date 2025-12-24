@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國家能源全方位分析系統 - v21.2 Portal</title>
+    <title>國家能源全方位分析系統 - v22.0 Responsive Portal</title>
     <!-- 
-      /* --- SYSTEM ARCHITECTURE: v21.2 (Path Realignment) --- */
-      1. 修正：配合檔案改名 (portal -> index, index -> overview)，更新導航 URL 映射。
-      2. 整合：將 EnergyPolicy.html 加入 NAVIGATION_CONFIG 並移至末尾。
-      3. 邏輯：主入口為 index.html，右側 iframe 載入內容頁面。
+      /* --- SYSTEM ARCHITECTURE: v22.0 (Mobile Responsive & Collapsible) --- */
+      1. 響應式設計：新增手機端漢堡選單與抽屜式導航。
+      2. 縮排機制：桌面端側邊欄支援「展開/收合」模式，優化 iframe 展示空間。
+      3. 互動邏輯：使用 JavaScript 控制側邊欄狀態，並同步優化載入遮罩。
     -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -23,12 +23,31 @@
             overflow: hidden;
         }
 
+        /* 側邊欄過渡動畫 */
         .sidebar { 
             background: #ffffff; 
             border-right: 1px solid #e2e8f0; 
-            width: 280px; 
-            box-shadow: 10px 0 30px rgba(0,0,0,0.02);
-            z-index: 50;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+
+        /* 桌面端展開/收合寬度 */
+        .sidebar-expanded { width: 280px; }
+        .sidebar-collapsed { width: 80px; }
+
+        /* 手機端抽屜樣式 */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                height: 100vh;
+                width: 280px;
+                transform: translateX(-100%);
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+                box-shadow: 20px 0 50px rgba(0,0,0,0.15);
+            }
+            .content-container { margin-left: 0 !important; }
         }
 
         .nav-link { 
@@ -39,21 +58,30 @@
             border-radius: 0.85rem; 
             color: #64748b; 
             font-weight: 700; 
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s;
             cursor: pointer;
             text-decoration: none;
             margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
         .nav-link:hover { background-color: #f1f5f9; color: #1e293b; }
-        
         .nav-link.active { 
             background-color: #eff6ff; 
             color: #2563eb; 
-            box-shadow: inset 0 0 0 1px rgba(37,99,235,0.08);
             border-left: 4px solid #2563eb;
             border-top-left-radius: 0;
             border-bottom-left-radius: 0;
+        }
+
+        /* 收合狀態隱藏文字 */
+        .sidebar-collapsed .nav-text, 
+        .sidebar-collapsed .logo-text,
+        .sidebar-collapsed .footer-text {
+            opacity: 0;
+            pointer-events: none;
+            width: 0;
         }
 
         .content-container { 
@@ -61,18 +89,33 @@
             height: 100vh; 
             position: relative;
             background: #f1f5f9;
+            display: flex;
+            flex-direction: column;
         }
 
+        /* 手機端頂部欄 */
+        .mobile-header {
+            display: none;
+            height: 60px;
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0 1rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+        @media (max-width: 768px) { .mobile-header { display: flex; } }
+
         iframe {
+            flex: 1;
             width: 100%;
             height: 100%;
             border: none;
-            display: block;
         }
 
         #page-loader {
             position: absolute;
             inset: 0;
+            top: 60px; /* 避開手機頂部欄 */
             background: #ffffff;
             display: flex;
             flex-direction: column;
@@ -81,93 +124,154 @@
             z-index: 40;
             transition: opacity 0.3s ease;
         }
+        @media (min-width: 769px) { #page-loader { top: 0; } }
 
         .loader-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #e2e8f0;
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e2e8f0;
             border-top-color: #2563eb;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* 遮罩背景 (手機端側欄開啟時) */
+        .backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 90;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .backdrop.active { opacity: 1; pointer-events: auto; }
     </style>
 </head>
 <body class="flex">
 
-    <!-- 全系統唯一的側邊導航 -->
-    <aside class="sidebar flex flex-col p-6 h-screen sticky top-0">
-        <div class="flex items-center gap-3 mb-10">
-            <div class="bg-blue-600 p-2.5 rounded-2xl text-white shadow-lg">
-                <i data-lucide="layout-template" class="w-6 h-6"></i>
+    <!-- 手機端背景遮罩 -->
+    <div id="backdrop" class="backdrop" onclick="toggleSidebar()"></div>
+
+    <!-- 響應式側邊導航 -->
+    <aside id="sidebar" class="sidebar sidebar-expanded flex flex-col p-4 h-screen sticky top-0">
+        <div class="flex items-center justify-between mb-8 px-2">
+            <div class="flex items-center gap-3 overflow-hidden">
+                <div class="bg-blue-600 p-2 rounded-xl text-white shadow-lg shrink-0">
+                    <i data-lucide="layout-template" class="w-6 h-6"></i>
+                </div>
+                <div class="logo-text transition-opacity duration-300">
+                    <h1 class="font-black text-base leading-tight tracking-tight text-slate-800">能源分析系統</h1>
+                    <span class="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded uppercase font-black text-[8px]">v22.0 Portal</span>
+                </div>
             </div>
-            <div>
-                <h1 class="font-black text-lg leading-tight tracking-tight text-slate-800">能源分析主控台</h1>
-                <span class="text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase font-black text-[9px]">v21.2 Portal</span>
-            </div>
+            <!-- 桌面端切換鈕 -->
+            <button onclick="toggleCollapse()" class="hidden md:flex p-1.5 hover:bg-slate-100 rounded-lg text-slate-400">
+                <i id="collapse-icon" data-lucide="chevron-left" class="w-5 h-5"></i>
+            </button>
         </div>
         
         <nav id="master-nav" class="flex-1 space-y-1">
-            <!-- 導航項目由 JS 動態生成 -->
+            <!-- 導航項目 -->
         </nav>
 
-        <div class="pt-6 border-t border-slate-100 mt-auto">
-            <div class="bg-slate-50 p-4 rounded-xl mb-4 text-center">
-                <p class="text-[10px] font-black text-emerald-600 flex items-center justify-center gap-1.5 uppercase">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Cloud Connected
+        <div class="pt-6 border-t border-slate-100 mt-auto footer-text transition-opacity duration-300">
+            <div class="bg-slate-50 p-3 rounded-xl mb-4 text-center">
+                <p class="text-[9px] font-black text-emerald-600 flex items-center justify-center gap-1.5 uppercase">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Cloud Online
                 </p>
             </div>
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed text-center">
-                Designed by Dr. JASW<br/>© 2025 National Analytics
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-relaxed text-center">
+                Designed by Dr. JASW<br/>© 2025 Analytics
             </p>
         </div>
     </aside>
 
-    <div class="content-container">
+    <main class="content-container">
+        <!-- 手機端頂部導航 -->
+        <header class="mobile-header">
+            <button onclick="toggleSidebar()" class="p-2 text-slate-600">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            <h2 class="font-bold text-slate-800 text-sm">能源分析主控台</h2>
+            <div class="w-10"></div> <!-- 保持平衡 -->
+        </header>
+
         <div id="page-loader">
-            <div class="loader-spinner mb-4"></div>
-            <p class="text-xs font-bold text-slate-400 tracking-widest uppercase">Syncing Cloud Resources...</p>
+            <div class="loader-spinner mb-3"></div>
+            <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Initializing Interface...</p>
         </div>
+        
         <iframe id="content-frame" name="content-frame" src=""></iframe>
-    </div>
+    </main>
 
     <script>
-        /* ============================================================
-           集中化導航配置
-           ============================================================ */
         const NAVIGATION_CONFIG = [
             { id: 'overview', label: '總體能源概況', icon: 'layout-dashboard', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/overview.html' },
             { id: 'key_metrics', label: '關鍵發展指標', icon: 'target', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/key_metrics.html' },
             { id: 'demand', label: '能源需求分析', icon: 'activity', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/demand_station.html' },
             { id: 'renewable', label: '再生能源分析', icon: 'leaf', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/renewable_station.html' },
             { id: 'solar', label: '太陽光電專區', icon: 'sun', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/solar_station.html' },
-            // 已更名為「我國能源政策」並維持在最下方
             { id: 'policy', label: '我國能源政策', icon: 'map', url: 'EnergyPolicy.html' }
         ];
 
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('backdrop');
         const frame = document.getElementById('content-frame');
         const loader = document.getElementById('page-loader');
-        let currentActive = 'overview'; // 將預設頁面改回總體概況
+        const collapseIcon = document.getElementById('collapse-icon');
+        
+        let currentActive = 'overview';
+        let isCollapsed = false;
+
+        // 手機端選單切換
+        function toggleSidebar() {
+            sidebar.classList.toggle('mobile-open');
+            backdrop.classList.toggle('active');
+        }
+
+        // 桌面端縮排切換
+        function toggleCollapse() {
+            isCollapsed = !isCollapsed;
+            if (isCollapsed) {
+                sidebar.classList.replace('sidebar-expanded', 'sidebar-collapsed');
+                collapseIcon.setAttribute('data-lucide', 'chevron-right');
+            } else {
+                sidebar.classList.replace('sidebar-collapsed', 'sidebar-expanded');
+                collapseIcon.setAttribute('data-lucide', 'chevron-left');
+            }
+            lucide.createIcons();
+        }
 
         function switchPage(id) {
             const page = NAVIGATION_CONFIG.find(p => p.id === id);
             if (!page) return;
             currentActive = id;
+            
             loader.style.opacity = '1';
             loader.style.pointerEvents = 'auto';
             frame.src = page.url;
+            
             renderNav();
+
+            // 若在手機端，選擇後自動收起選單
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('mobile-open');
+                backdrop.classList.remove('active');
+            }
         }
 
         function renderNav() {
             const nav = document.getElementById('master-nav');
             nav.innerHTML = NAVIGATION_CONFIG.map(item => `
                 <div class="nav-link ${currentActive === item.id ? 'active' : ''}" 
-                     onclick="switchPage('${item.id}')">
-                    <i data-lucide="${item.icon}" class="w-5 h-5"></i>
-                    <span>${item.label}</span>
+                     onclick="switchPage('${item.id}')" title="${item.label}">
+                    <i data-lucide="${item.icon}" class="w-5 h-5 shrink-0"></i>
+                    <span class="nav-text transition-opacity duration-300">${item.label}</span>
                 </div>
             `).join('');
             lucide.createIcons();
