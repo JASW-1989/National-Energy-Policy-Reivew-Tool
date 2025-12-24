@@ -3,29 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>太陽光電分析站 v22.5</title>
+    <title>國家能源全方位分析 - 太陽光電 v20.30</title>
     <!-- 
-      /* --- SYSTEM VERSION: v22.5 (Canvas Preview Optimized) --- */
-      1. 優化：改用 DOMContentLoaded 並搭配 300ms 緩衝渲染，解決圖表在 Canvas 預覽器中寬度縮小的問題。
-      2. 增強：加入系統載入遮罩 (Loader)，優化外部函式庫載入與數據計算期間的視覺呈現。
-      3. 修正：強化圖表初始化邏輯，加入 try-catch 區塊，確保數據標籤與 Tooltip 穩定運作。
-      4. 數據：維持 v22.0 的嚴謹校對數據，同步能源署 2024 全年實績與 2025 逐月公告。
+      /* --- SYSTEM VERSION: v20.30 (UI Clean-up Edition) --- */
+      1. UI 修正：刪除「資料來源與計算說明」文字區塊，簡化頁面視覺。
+      2. 資料：維持依照「近2年再生能源裝置容量.json」更新之 2024-2025 逐月新增容量 (MW)。
+      3. 校正：2025 年 1-10 月數據全數對齊實績，確保數據精確性。
+      4. 標籤：維持標籤位移 (offsetY: -25) 與網格間距，解決標籤重疊問題。
     -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
         
         body { 
             font-family: 'Noto Sans TC', sans-serif; 
             background-color: #f8fafc; 
-            color: #1e293b;
+            color: #1e293b; 
             margin: 0;
+            overflow: hidden;
         }
 
-        /* 側邊欄樣式 */
-        .sidebar { background: #ffffff; }
+        .sidebar { background: #ffffff; border-right: 1px solid #e2e8f0; }
         .nav-link { 
             display: flex; 
             align-items: center; 
@@ -37,45 +37,34 @@
             transition: all 0.2s ease;
             text-decoration: none;
         }
-        .nav-link:hover { 
-            background-color: #f1f5f9; 
-            color: #1e293b; 
-        }
+        .nav-link:hover { background-color: #fffbeb; color: #b45309; }
         .nav-link.active { 
-            background-color: #fff7ed; 
-            color: #ea580c; 
-            border-left: 4px solid #ea580c; 
-            border-top-left-radius: 0; 
-            border-bottom-left-radius: 0; 
+            background-color: #fffbeb; 
+            color: #d97706; 
+            border-left: 4px solid #d97706;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
         }
 
-        /* 內容區樣式 */
         .main-content { 
             flex: 1;
             height: 100vh;
             overflow-y: auto; 
             scroll-behavior: smooth; 
-            padding-bottom: 6rem; 
+            padding-bottom: 10rem;
         }
 
-        /* 卡片設計 */
         .chart-card { 
             background: white; 
             border-radius: 1.5rem; 
             border: 1px solid #e2e8f0; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
-        }
-        .chart-card:hover { 
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: visible !important;
         }
 
-        /* 自定義捲軸 */
-        .main-content::-webkit-scrollbar { width: 6px; }
-        .main-content::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-
-        /* 載入中遮罩 */
+        .main-content::-webkit-scrollbar { width: 5px; }
+        .main-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
         #loader {
             position: fixed;
             inset: 0;
@@ -88,240 +77,194 @@
         }
     </style>
 </head>
-<body class="flex flex-col md:flex-row min-h-screen">
+<body class="flex">
 
-    <!-- 載入動畫 -->
     <div id="loader">
         <div class="flex flex-col items-center gap-4">
-            <div class="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-sm font-bold text-slate-500 animate-pulse">太陽光電數據分析中...</p>
+            <div class="w-12 h-12 border-4 border-[#d97706] border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm font-bold text-slate-500 tracking-widest">數據同步核對中...</p>
         </div>
     </div>
 
-    <!-- 側邊導航列 -->
-    <aside class="w-full md:w-72 border-r border-slate-200 bg-white flex flex-col p-6 h-auto md:h-screen sticky top-0 z-50">
+    <!-- 側邊導航 -->
+    <aside class="sidebar w-72 h-screen border-r flex flex-col p-6 sticky top-0 z-50">
         <div class="flex items-center gap-3 mb-12">
-            <div class="bg-amber-500 p-2.5 rounded-2xl text-white shadow-lg shadow-amber-100">
+            <div class="bg-[#d97706] p-2.5 rounded-2xl text-white shadow-lg shadow-amber-100">
                 <i data-lucide="sun" class="w-6 h-6"></i>
             </div>
             <div>
-                <h1 class="font-black text-lg leading-tight tracking-tighter text-slate-800">能源全方位分析</h1>
-                <span class="text-[9px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded uppercase tracking-widest">v22.5 Solar Audit</span>
+                <h1 class="font-black text-lg leading-tight tracking-tighter text-slate-800">太陽光電分析</h1>
+                <span class="text-[9px] font-black text-[#d97706] bg-amber-50 px-2 py-0.5 rounded uppercase tracking-widest">v20.30 JSON Sync</span>
             </div>
         </div>
-        <nav class="flex-1 space-y-1.5">
-            <a href="index.html" class="nav-link active"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> 總體能源概況</a>
+        
+        <nav class="flex-1 space-y-2">
+            <a href="index.html" class="nav-link"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> 總體能源概況</a>
             <a href="key_metrics.html" class="nav-link"><i data-lucide="target" class="w-5 h-5"></i> 關鍵發展指標</a>
             <a href="demand_station.html" class="nav-link"><i data-lucide="activity" class="w-5 h-5"></i> 能源需求分析</a>
             <a href="renewable_station.html" class="nav-link"><i data-lucide="leaf" class="w-5 h-5"></i> 再生能源分析</a>
-            <a href="solar_station.html" class="nav-link"><i data-lucide="sun" class="w-5 h-5"></i> 太陽光電專區</a></a>
+            <a href="solar_station.html" class="nav-link active"><i data-lucide="sun" class="w-5 h-5"></i> 太陽光電專區</a>
         </nav>
-        <div class="pt-6 border-t border-slate-100 mt-6 md:mt-auto text-[10px] font-black text-slate-400 uppercase text-center tracking-widest leading-relaxed">
+
+        <div class="pt-6 border-t border-slate-100 mt-auto text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed text-center">
             Author: Dr. JASW<br/>© 2025 National Energy Analytics
         </div>
     </aside>
 
-    <!-- 主內容區 -->
-    <main class="main-content p-6 md:p-12 lg:p-16">
-        <div class="max-w-[1200px] mx-auto space-y-12">
-            <header>
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="px-2 py-0.5 bg-amber-50 text-amber-600 rounded text-xs font-bold">光電專題研究</span>
+    <main class="main-content p-8 md:p-12 lg:p-16">
+        <div class="max-w-[1100px] mx-auto space-y-20">
+            
+            <header class="space-y-2">
+                <div class="flex items-center gap-2 text-amber-700 font-bold text-xs uppercase tracking-widest">
+                    <span class="px-2 py-0.5 bg-amber-50 rounded">JSON 實績直連</span>
+                    <span>2024 - 2025 完整維度同步修正</span>
                 </div>
-                <h2 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">太陽光電專區 (Solar PV Audit)</h2>
-                <p class="text-slate-500 font-medium mt-2 italic">數據來源：能源署再生能源裝置容量逐月統計 (更新至 114/10)。</p>
+                <h2 class="text-4xl font-black tracking-tight text-slate-900 uppercase">太陽光電專區 (Solar PV)</h2>
+                <p class="text-slate-500 font-medium">觀測建設動能與產出貢獻。數據已根據最新提供的 JSON 檔案進行底層替換。</p>
             </header>
 
             <!-- 1. 年度新增裝置趨勢 -->
             <section class="space-y-6">
-                <div class="chart-card p-6 md:p-10">
-                    <div id="yearly-solar-chart"></div>
+                <div class="chart-card p-10">
+                    <div id="yearly-added-chart"></div>
+                    <div class="mt-4 text-[11px] text-slate-400 italic text-right">單位：GW。數據根據 2015-2024 年實績修訂。</div>
                 </div>
             </section>
 
-            <!-- 2. 近 2 年逐月比較 -->
+            <!-- 2. 近 2 年逐月新增裝置比較 (資料直連) -->
             <section class="space-y-6">
-                <div class="chart-card p-6 md:p-10">
+                <div class="chart-card p-10">
                     <div id="monthly-compare-chart"></div>
-                    <div class="mt-6 flex items-start gap-3 bg-slate-50 p-4 rounded-xl">
-                        <i data-lucide="info" class="w-5 h-5 text-blue-500 mt-0.5"></i>
-                        <p class="text-xs text-slate-500 leading-relaxed">
-                            <strong>校核說明：</strong>2024 年實績總增量校正為 1,863.5 MW。2025 年公告數據目前更新至 10 月。長條圖數據標籤顯示為當月新增量 (MW)。
-                        </p>
-                    </div>
                 </div>
             </section>
 
-            <!-- 3. 月均新增效率 -->
+            <!-- 3. 2025 逐月發電量實績 -->
             <section class="space-y-6">
-                <div class="chart-card p-6 md:p-10">
-                    <h3 class="text-xl font-black text-amber-600 mb-8 flex items-center gap-3">
-                        <i data-lucide="trending-up" class="w-6 h-6"></i> 太陽光電逐年月均新增裝置容量 (MW/月)
-                    </h3>
-                    <div id="efficiency-trend-chart"></div>
+                <div class="chart-card p-10">
+                    <div id="monthly-gen-chart"></div>
+                    <div class="mt-4 text-[11px] text-slate-400 italic text-right">單位：億度。反映 114 年 1-10 月之發電產出實績。</div>
                 </div>
             </section>
+
+            <!-- 4. 太陽光電逐年月均新增建置效率趨勢 -->
+            <section class="space-y-6">
+                <div class="chart-card p-10">
+                    <div id="monthly-added-avg-chart"></div>
+                </div>
+            </section>
+
         </div>
     </main>
 
     <script>
-        const THEME = { solar: '#f97316', y24: '#94a3b8', text: '#1e293b' };
+        const SOLAR_PALETTE = {
+            main: '#f59e0b',    
+            light: '#fbbf24',   
+            dark: '#b45309',    
+            accent: '#d97706',  
+            gray: '#94a3b8',
+            grid: '#f1f5f9'
+        };
+
+        // --- 靜態資料陣列 (直接從 JSON 提取) ---
+        // 2024 逐月新增容量 (MW)
+        const DATA_2024_INC = [40.75, 111.38, 246.48, 146.75, 257.44, 175.22, 121.69, 104.79, 83.35, 112.73, 108.37, 354.51];
+        
+        // 2025 逐月新增容量 (MW) - 依據最新 JSON 全面同步
+        const DATA_2025_INC = [83.36, 76.37, 69.99, 111.52, 105.24, 116.71, 98.27, 76.47, 79.68, 84.81, null, null];
+
+        // 2025 逐月發電量 (億度) - 同步至 10 月
+        const DATA_2025_GEN = [8.5, 9.2, 11.4, 12.8, 14.5, 16.0, 15.8, 15.4, 15.5, 12.1, null, null];
 
         document.addEventListener("DOMContentLoaded", function() {
-            // 初始化 Lucide
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+            lucide.createIcons();
 
-            // 檢查 ApexCharts
-            if (typeof ApexCharts === 'undefined') {
-                console.error("ApexCharts failed to load.");
-                document.getElementById('loader').innerHTML = '<p class="text-red-500 font-bold">圖表模組載入錯誤。</p>';
-                return;
-            }
-
-            // 延遲渲染以穩定佈局
             setTimeout(() => {
                 try {
                     // (1) 太陽光電年度新增裝置趨勢 (GW)
-                    new ApexCharts(document.querySelector("#yearly-solar-chart"), {
-                        series: [{ 
-                            name: '年度新增量', 
-                            data: [0.22, 0.37, 0.55, 0.97, 1.41, 1.67, 1.89, 2.02, 2.69, 1.86] 
-                        }],
-                        chart: { 
-                            type: 'bar', 
-                            height: 400, 
-                            fontFamily: 'Noto Sans TC',
-                            toolbar: { show: false } 
-                        },
-                        title: { 
-                            text: "太陽光電年度新增裝置趨勢 (GW)", 
-                            align: 'left',
-                            style: { fontSize: '20px', fontWeight: 900, color: '#1e293b' } 
-                        },
-                        colors: [THEME.solar],
-                        plotOptions: { 
-                            bar: { 
-                                columnWidth: '60%', 
-                                borderRadius: 8, 
-                                dataLabels: { position: 'top' } 
-                            } 
-                        },
+                    new ApexCharts(document.querySelector("#yearly-added-chart"), {
+                        series: [{ name: '年度新增量', data: [0.22, 0.37, 0.55, 0.97, 1.41, 1.67, 1.89, 2.02, 2.69, 1.86] }],
+                        chart: { type: 'bar', height: 400, toolbar: { show: false }, fontFamily: 'Noto Sans TC' },
+                        title: { text: "太陽光電年度新增裝置趨勢 (2015-2024)", align: 'left', style: { fontSize: '20px', fontWeight: 900 } },
+                        colors: [SOLAR_PALETTE.main],
+                        plotOptions: { bar: { columnWidth: '60%', borderRadius: 8, dataLabels: { position: 'top' } } },
                         dataLabels: { 
                             enabled: true, 
                             offsetY: -25, 
-                            style: { fontWeight: 800, fontSize: '12px', colors: [THEME.text] }, 
-                            formatter: v => "+" + v.toFixed(2) + " GW"
+                            style: { fontWeight: 900, fontSize: '12px', colors: ['#1e293b'] },
+                            formatter: (v) => "+" + v.toFixed(2)
                         },
-                        xaxis: { 
-                            categories: ["2015","2016","2017","2018","2019","2020","2021","2022","2023","2024"], 
-                            labels: { style: { fontWeight: 700, colors: '#64748b' } } 
-                        },
-                        yaxis: {
-                            labels: { 
-                                formatter: v => v + " GW",
-                                style: { fontWeight: 700, colors: '#64748b' }
-                            }
-                        }
+                        xaxis: { categories: ["2015","2016","2017","2018","2019","2020","2021","2022","2023","2024實績"], labels: { style: { fontWeight: 700 } } },
+                        yaxis: { title: { text: 'GW', style: { fontWeight: 800 } } },
+                        grid: { borderColor: SOLAR_PALETTE.grid, padding: { top: 40 } }
                     }).render();
 
-                    // (2) 近 2 年太陽光電逐月新增比較 (MW)
+                    // (2) 近 2 年逐月新增比較 (MW) - 100% 同步新版 JSON
                     new ApexCharts(document.querySelector("#monthly-compare-chart"), {
                         series: [
-                            { 
-                                name: '2024 實績', 
-                                data: [131.2, 134.6, 152.2, 146.8, 182.8, 217.2, 164.4, 185.3, 192.4, 183.7, 104.3, 68.6] 
-                            }, 
-                            { 
-                                name: '2025 公告', 
-                                data: [114.1, 129.6, 157.6, 151.7, 131.7, 116.6, 85.8, 77.2, 67.4, 49.6, null, null] 
-                            }
+                            { name: '2024 新增容量 (MW)', data: DATA_2024_INC }, 
+                            { name: '2025 新增容量 (MW)', data: DATA_2025_INC }
                         ],
-                        chart: { 
-                            type: 'bar', 
-                            height: 500, 
-                            fontFamily: 'Noto Sans TC',
-                            toolbar: { show: false } 
-                        },
-                        title: { 
-                            text: "近 2 年太陽光電逐月新增比較 (MW)", 
-                            align: 'left',
-                            style: { fontSize: '20px', fontWeight: 900, color: '#1e293b' } 
-                        },
-                        colors: [THEME.y24, THEME.solar],
-                        plotOptions: { 
-                            bar: { 
-                                columnWidth: '75%', 
-                                borderRadius: 4, 
-                                dataLabels: { position: 'top' } 
-                            } 
-                        },
+                        chart: { type: 'bar', height: 450, toolbar: { show: false }, fontFamily: 'Noto Sans TC' },
+                        title: { text: "近 2 年太陽光電逐月新增裝置容量比較 (MW)", align: 'left', style: { fontSize: '20px', fontWeight: 900 } },
+                        colors: [SOLAR_PALETTE.gray, SOLAR_PALETTE.main],
+                        plotOptions: { bar: { columnWidth: '75%', borderRadius: 4, dataLabels: { position: 'top' } } },
                         dataLabels: { 
                             enabled: true, 
-                            offsetY: -20, 
-                            style: { fontWeight: 800, fontSize: '10px', colors: [THEME.text] },
-                            formatter: v => v !== null ? v.toFixed(1) : ""
+                            offsetY: -25, 
+                            style: { fontWeight: 900, fontSize: '10px', colors: ['#1e293b'] },
+                            formatter: (v) => v !== null ? v.toFixed(1) : ""
                         },
-                        xaxis: { 
-                            categories: ["01月","02月","03月","04月","05月","06月","07月","08月","09月","10月","11月","12月"], 
-                            labels: { style: { fontWeight: 700, colors: '#64748b' } } 
-                        },
-                        yaxis: {
-                            labels: { 
-                                formatter: v => v + " MW",
-                                style: { fontWeight: 700, colors: '#64748b' }
-                            }
-                        },
-                        legend: { position: 'top', horizontalAlign: 'right', fontWeight: 700, markers: { radius: 12 } }
+                        xaxis: { categories: ["01月","02月","03月","04月","05月","06月","07月","08月","09月","10月","11月","12月"], labels: { style: { fontWeight: 700 } } },
+                        legend: { position: 'top', horizontalAlign: 'right', fontWeight: 700 },
+                        grid: { borderColor: SOLAR_PALETTE.grid, padding: { top: 40 } }
                     }).render();
 
-                    // (3) 太陽光電逐年月均新增裝置容量 (MW/月)
-                    new ApexCharts(document.querySelector("#efficiency-trend-chart"), {
-                        series: [{ 
-                            name: '月均新增量', 
-                            data: [31, 46, 81, 118, 139, 158, 168, 224, 155, 108] 
-                        }],
-                        chart: { 
-                            type: 'line', 
-                            height: 450, 
-                            fontFamily: 'Noto Sans TC',
-                            toolbar: { show: false } 
+                    // (3) 2025 太陽光電逐月發電量 (億度)
+                    new ApexCharts(document.querySelector("#monthly-gen-chart"), {
+                        series: [{ name: '月發電實績', data: DATA_2025_GEN }],
+                        chart: { type: 'bar', height: 400, toolbar: { show: false }, fontFamily: 'Noto Sans TC' },
+                        title: { text: "2025 年太陽光電逐月發電量實績 (億度)", align: 'left', style: { fontSize: '20px', fontWeight: 900 } },
+                        colors: [SOLAR_PALETTE.accent],
+                        plotOptions: { bar: { columnWidth: '70%', borderRadius: 4, dataLabels: { position: 'top' } } },
+                        dataLabels: { 
+                            enabled: true, 
+                            offsetY: -25, 
+                            style: { fontWeight: 900, fontSize: '11px', colors: ['#1e293b'] },
+                            formatter: (v) => v ? v.toFixed(1) : ""
                         },
+                        xaxis: { categories: ["01月","02月","03月","04月","05月","06月","07月","08月","09月","10月","11月","12月"], labels: { style: { fontWeight: 700 } } },
+                        yaxis: { title: { text: '億度', style: { fontWeight: 800 } } },
+                        grid: { borderColor: SOLAR_PALETTE.grid, padding: { top: 40 } }
+                    }).render();
+
+                    // (4) 太陽光電月均建置效率趨勢 (2025 實績校正版)
+                    new ApexCharts(document.querySelector("#monthly-added-avg-chart"), {
+                        series: [{ name: '月均新增量', data: [18.3, 30.8, 45.8, 80.8, 117.5, 139.2, 157.5, 168.3, 224.2, 155.0, 90.2] }],
+                        chart: { type: 'line', height: 400, toolbar: { show: false }, fontFamily: 'Noto Sans TC' },
+                        title: { text: "太陽光電逐年月均新增建置效率 (2015-2025)", align: 'left', style: { fontSize: '20px', fontWeight: 900 } },
                         stroke: { width: 5, curve: 'smooth' },
-                        colors: [THEME.solar],
-                        markers: { 
-                            size: 7, 
-                            strokeWidth: 3, 
-                            strokeColors: '#fff', 
-                            hover: { size: 9 } 
-                        },
-                        xaxis: { 
-                            categories: ["2016","2017","2018","2019","2020","2021","2022","2023","2024","2025預計"], 
-                            labels: { style: { fontWeight: 700, colors: '#64748b' } } 
-                        },
-                        yaxis: { 
-                            title: { text: 'MW / 月', style: { fontWeight: 800, color: '#64748b' } },
-                            labels: { style: { fontWeight: 700, colors: '#64748b' } }
-                        },
+                        colors: [SOLAR_PALETTE.dark],
+                        markers: { size: 6, strokeWidth: 3, strokeColors: '#fff', hover: { size: 9 } },
                         dataLabels: { 
                             enabled: true, 
                             offsetY: -15, 
-                            style: { fontWeight: 800, fontSize: '13px' },
-                            formatter: v => v + " MW"
+                            style: { fontWeight: 900, fontSize: '11px' }
                         },
-                        grid: { borderColor: '#f1f5f9', strokeDashArray: 4 }
+                        xaxis: { categories: ["2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025實績"], labels: { style: { fontWeight: 700 } } },
+                        yaxis: { title: { text: 'MW / 月', style: { fontWeight: 800 } } },
+                        grid: { borderColor: SOLAR_PALETTE.grid, padding: { top: 40 } }
                     }).render();
 
-                    // 4. 關閉載入畫面
                     const loader = document.getElementById('loader');
                     loader.style.opacity = '0';
                     setTimeout(() => loader.style.display = 'none', 500);
 
-                } catch (err) {
-                    console.error("Chart Rendering Error:", err);
+                } catch (e) {
+                    console.error("Layout Rendering Error:", e);
                 }
-            }, 300);
+            }, 400);
         });
     </script>
 </body>
-
 </html>
