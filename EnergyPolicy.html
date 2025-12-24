@@ -3,303 +3,375 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國家能源全方位分析系統 - v24.1 Portal</title>
+    <title>我國能源政策 v40.0 - 2025 戰略更新版</title>
     <!-- 
-      /* --- SYSTEM ARCHITECTURE: v24.1 (URL Deployment & Alignment) --- */
-      1. 網址更新：將政策、成本、公正轉型導航至 GitHub 正式網址。
-      2. 縮排修正：優化 sidebar-collapsed 狀態下的 Icon 居中對齊邏輯。
-      3. 視覺一致性：側邊欄收合寬度維持 80px，確保內容區（iframe）自動填滿剩餘空間。
+      /* --- SYSTEM ARCHITECTURE: v40.0 (Resource Refinement) --- */
+      1. 資源修正：更名 2050 淨零路徑並更新連結；更名能源發展綱領並修正年份為 2017。
+      2. 新增計畫：加入 2025 年「六大部門減碳行動計畫」。
+      3. 排序優化：嚴格執行 2025 -> 2017 年份倒序排列，提升檢索效率。
+      4. 視覺：維持高對比配色，無淺灰色，適配白底環境。
     -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Inter:wght@400;700;900&display=swap');
         
+        :root {
+            --brand-primary: #4f46e5;
+            --brand-indigo: #4338ca;
+            --brand-emerald: #10b981;
+            --bg-main: #f8fafc;
+            --chart-label: #334155; 
+        }
+
         body { 
-            font-family: 'Noto Sans TC', sans-serif; 
-            background-color: #f8fafc; 
+            font-family: 'Inter', 'Noto Sans TC', sans-serif; 
+            background-color: var(--bg-main); 
             color: #1e293b;
             margin: 0;
             overflow: hidden;
-            display: flex;
+            font-size: 18px; 
         }
 
-        /* 側邊欄基礎與動畫 */
-        .sidebar { 
-            background: #ffffff; 
-            border-right: 1px solid #e2e8f0; 
-            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 100;
-            flex-shrink: 0;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+        .main-scroll {
+            height: 100vh;
+            overflow-y: auto;
+            padding-bottom: 4rem;
+            scroll-behavior: smooth;
         }
 
-        /* 寬度定義 */
-        .sidebar-expanded { width: 280px; }
-        .sidebar-collapsed { width: 80px; }
-
-        /* 手機端響應式 */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                height: 100vh;
-                width: 280px;
-                transform: translateX(-100%);
-                margin-right: -280px; 
-            }
-            .sidebar.mobile-open {
-                transform: translateX(0);
-                box-shadow: 20px 0 50px rgba(0,0,0,0.15);
-                margin-right: 0;
-            }
-            .content-container { 
-                width: 100% !important;
-                flex: none !important; 
-            }
-        }
-
-        /* 導航連結佈局 */
-        .nav-link { 
-            display: flex; 
-            align-items: center; 
-            padding: 0.85rem 1.25rem; 
-            border-radius: 0.85rem; 
-            color: #64748b; 
-            font-weight: 700; 
-            transition: all 0.2s ease;
-            cursor: pointer;
-            text-decoration: none;
-            margin-bottom: 0.25rem;
-            white-space: nowrap;
-            width: calc(100% - 1.5rem);
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* 縮排狀態下的對齊修正：強制 Icon 置中靠齊 */
-        .sidebar-collapsed .nav-link {
-            padding: 0.85rem 0;
-            justify-content: center;
-            width: 50px; 
-        }
-
-        .nav-link:hover { background-color: #f1f5f9; color: #1e293b; }
-        .nav-link.active { 
-            background-color: #eff6ff; 
-            color: #2563eb; 
-            border-left: 4px solid #2563eb;
-            border-top-left-radius: 0;
-            border-bottom-left-radius: 0;
-        }
-        .sidebar-collapsed .nav-link.active {
-            border-left: none;
-            background-color: #eff6ff;
-            border-radius: 0.85rem;
-        }
-
-        /* 內容文字隱藏動畫 */
-        .collapsible-text {
-            transition: opacity 0.2s ease;
-            margin-left: 0.8rem;
-            display: inline-block;
-        }
-        .sidebar-collapsed .collapsible-text {
-            opacity: 0;
-            display: none; 
-        }
-
-        .content-container { 
-            flex: 1; 
-            height: 100vh; 
-            position: relative;
-            background: #f1f5f9;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* 頂部 Header 收合時隱藏文字 */
-        .sidebar-collapsed .logo-text,
-        .sidebar-collapsed .footer-text {
-            display: none;
-        }
-
-        /* Iframe 與 Loader */
-        iframe { flex: 1; width: 100%; height: 100%; border: none; }
-        #page-loader {
-            position: absolute;
-            inset: 0;
+        .glass-card {
             background: #ffffff;
+            border-radius: 1rem;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            box-shadow: 0 20px 30px -5px rgba(79, 70, 229, 0.12);
+            border-color: var(--brand-primary);
+        }
+
+        .policy-card-item {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            z-index: 40;
-            transition: opacity 0.3s ease;
+            padding: 1.25rem 1.75rem;
+            background: #ffffff;
+            border-radius: 0.75rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #cbd5e1;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        
+        .policy-card-item:hover {
+            border-color: var(--brand-primary);
+            background: #f8fafc;
+            transform: translateX(5px);
         }
 
-        .loader-spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid #e2e8f0;
-            border-top-color: #2563eb;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+        .year-indicator {
+            font-weight: 900;
+            font-size: 0.85rem;
+            color: #ffffff;
+            background: var(--brand-indigo);
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.4rem;
+            min-width: 65px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(67, 56, 202, 0.3);
         }
 
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        .backdrop {
+        #loader {
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(2px);
-            z-index: 90;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
+            background: #ffffff;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .backdrop.active { opacity: 1; pointer-events: auto; }
+
+        .main-scroll::-webkit-scrollbar { width: 5px; }
+        .main-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
     </style>
 </head>
-<body class="flex">
+<body class="bg-slate-50">
 
-    <div id="backdrop" class="backdrop" onclick="toggleSidebar()"></div>
+    <div id="loader">
+        <div class="flex flex-col items-center gap-3">
+            <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-sm font-black text-slate-600 tracking-widest uppercase">Syncing Policy Archive...</p>
+        </div>
+    </div>
 
-    <!-- 側邊導航 -->
-    <aside id="sidebar" class="sidebar sidebar-expanded h-screen sticky top-0 p-4">
-        <div class="flex items-center justify-between mb-8 px-2">
-            <div class="flex items-center gap-3 overflow-hidden">
-                <div class="bg-blue-600 p-2 rounded-xl text-white shadow-lg shrink-0">
-                    <i data-lucide="layout-template" class="w-6 h-6"></i>
+    <div class="main-scroll p-6 md:p-10">
+        <div class="max-w-[1500px] mx-auto space-y-8">
+            
+            <!-- 頂部標題 -->
+            <header class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-300 pb-6">
+                <div class="space-y-3">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 rounded-full mb-1">
+                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-700"></span>
+                        <span class="text-indigo-800 font-black text-[11px] uppercase tracking-[0.15em]">Official Strategy Hub</span>
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 leading-tight">我國能源政策</h2>
+                    <p class="text-slate-700 font-bold text-lg md:text-xl">整合最新減碳行動計畫與國家長期能源轉型路徑藍圖。</p>
                 </div>
-                <div class="logo-text">
-                    <h1 class="font-black text-base leading-tight tracking-tight text-slate-800">能源分析系統</h1>
-                    <span class="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded uppercase font-black text-[8px]">v24.1 Portal</span>
+                <div class="bg-slate-900 text-white px-5 py-2.5 rounded-xl shadow-lg">
+                    <p class="text-[10px] font-black uppercase opacity-70 leading-none mb-1">Last Update</p>
+                    <p class="text-xl font-black italic">114年12月</p>
                 </div>
-            </div>
-            <!-- 桌面端切換鈕 -->
-            <button onclick="toggleCollapse()" class="hidden md:flex p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 shrink-0">
-                <i id="collapse-icon" data-lucide="chevron-left" class="w-5 h-5"></i>
-            </button>
-        </div>
-        
-        <nav id="master-nav" class="flex-1 space-y-1">
-            <!-- JS 動態載入 -->
-        </nav>
+            </header>
 
-        <div class="pt-6 border-t border-slate-100 mt-auto flex flex-col items-center">
-            <div class="footer-text bg-slate-50 p-3 rounded-xl mb-4 text-center w-full">
-                <p class="text-[9px] font-black text-emerald-600 flex items-center justify-center gap-1.5 uppercase">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Online
-                </p>
-            </div>
-            <p class="text-[10px] font-black text-slate-400 tracking-widest text-center">
-                © 2025
-            </p>
-        </div>
-    </aside>
+            <!-- 核心圖表看板 -->
+            <section class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                
+                <div class="space-y-8">
+                    <!-- 圖表 1：短期能源轉型政策及達成情形 -->
+                    <div class="glass-card p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="space-y-1">
+                                <h3 class="font-black text-slate-900 text-2xl">短期能源轉型政策及達成情形</h3>
+                                <p class="text-slate-600 text-xs font-black uppercase tracking-widest">Electricity Structure Evolution (%)</p>
+                            </div>
+                            <i data-lucide="bar-chart-3" class="text-indigo-600 w-6 h-6 opacity-40"></i>
+                        </div>
+                        <div id="chart-main-structure"></div>
+                    </div>
 
-    <main class="content-container">
-        <!-- 手機頂部欄 -->
-        <header class="md:hidden flex h-[60px] bg-white border-bottom border-slate-200 items-center px-4 justify-between shrink-0">
-            <button onclick="toggleSidebar()" class="p-2 text-slate-600">
-                <i data-lucide="menu" class="w-6 h-6"></i>
-            </button>
-            <h2 class="font-bold text-slate-800 text-sm">能源分析主控台</h2>
-            <div class="w-10"></div>
-        </header>
+                    <!-- 圖表：國家長期能源配比規劃 (2024-2050) -->
+                    <div class="glass-card p-8 border-l-[6px] border-l-indigo-600">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="space-y-1">
+                                <h3 class="font-black text-slate-900 text-2xl">國家長期能源配比規劃 (2024-2050)</h3>
+                                <p class="text-slate-600 text-xs font-black uppercase tracking-widest">Long-term Net Zero Projection (%)</p>
+                            </div>
+                            <i data-lucide="calendar" class="text-indigo-600 w-6 h-6 opacity-40"></i>
+                        </div>
+                        <div id="chart-long-term-structure"></div>
+                        <div class="mt-4 p-4 bg-slate-900 rounded-xl text-sm text-white font-medium">
+                            <p class="flex items-start gap-2 leading-relaxed">
+                                <i data-lucide="info" class="w-5 h-5 mt-0.5 shrink-0 text-amber-400"></i>
+                                <span><strong>轉型路徑：</strong> 燃煤發電預計於 2035 年降至 10% 以下，並於 2050 年實現以再生能源（60-70%）及氫能等低碳能源為主之電力結構。</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
-        <div id="page-loader">
-            <div class="loader-spinner mb-3"></div>
-            <p class="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Switching Dashboard...</p>
+                <!-- 圖表 2：2025能源轉型政策目標達成率 -->
+                <div class="glass-card p-8 h-full flex flex-col">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="space-y-1">
+                            <h3 class="font-black text-slate-900 text-2xl">2025能源轉型政策目標達成率</h3>
+                            <p class="text-slate-600 text-xs font-black uppercase tracking-widest">KPI Achievement Progress</p>
+                        </div>
+                        <i data-lucide="target" class="text-emerald-600 w-6 h-6 opacity-40"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div id="chart-gap-analysis"></div>
+                    </div>
+                    
+                    <div class="mt-8 pt-8 border-t border-slate-200 flex justify-between px-2">
+                        <div class="text-center group flex-1">
+                            <p class="text-base font-black text-slate-600 uppercase mb-2 group-hover:text-indigo-600 transition-colors">太陽光電</p>
+                            <p class="text-5xl md:text-6xl xl:text-7xl font-black text-slate-900 tracking-tighter">15.18 <span class="text-xl text-slate-500 font-bold ml-1">GW</span></p>
+                        </div>
+                        <div class="text-center group flex-1 border-x border-slate-200">
+                            <p class="text-base font-black text-slate-600 uppercase mb-2 group-hover:text-indigo-600 transition-colors">離岸風電</p>
+                            <p class="text-5xl md:text-6xl xl:text-7xl font-black text-slate-900 tracking-tighter">3.35 <span class="text-xl text-slate-500 font-bold ml-1">GW</span></p>
+                        </div>
+                        <div class="text-center group flex-1">
+                            <p class="text-base font-black text-slate-600 uppercase mb-2 group-hover:text-indigo-600 transition-colors">地熱發電</p>
+                            <p class="text-5xl md:text-6xl xl:text-7xl font-black text-slate-900 tracking-tighter">7.49 <span class="text-xl text-slate-500 font-bold ml-1">MW</span></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 政策文件資源中心 (更新且依年份排序) -->
+            <section class="max-w-[1300px] mx-auto space-y-6">
+                <div class="flex items-center gap-4">
+                    <h3 class="text-2xl font-black text-slate-900 flex items-center gap-3">
+                        <i data-lucide="library" class="text-indigo-700 w-7 h-7"></i> 政策文件資源中心
+                    </h3>
+                    <div class="flex-1 h-[2px] bg-slate-300"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+                    <!-- 2025 -->
+                    <a href="https://reurl.cc/MM971k" 
+                       target="_blank" class="policy-card-item group">
+                        <span class="year-indicator">2025</span>
+                        <p class="ml-4 font-black text-slate-800 group-hover:text-indigo-700 text-lg flex-1">臺灣總體減碳行動計畫</p>
+                        <i data-lucide="chevron-right" class="w-6 h-6 text-slate-400 group-hover:text-indigo-600"></i>
+                    </a>
+
+                    <a href="https://reurl.cc/mk7ddA" 
+                       target="_blank" class="policy-card-item group">
+                        <span class="year-indicator">2025</span>
+                        <p class="ml-4 font-black text-slate-800 group-hover:text-indigo-700 text-lg flex-1">六大部門減碳行動計畫</p>
+                        <i data-lucide="chevron-right" class="w-6 h-6 text-slate-400 group-hover:text-indigo-600"></i>
+                    </a>
+
+                    <!-- 2022 -->
+                    <a href="https://reurl.cc/9bxzEx" 
+                       target="_blank" class="policy-card-item group">
+                        <span class="year-indicator shadow-sm">2022</span>
+                        <p class="ml-4 font-black text-slate-800 group-hover:text-indigo-700 text-lg flex-1">2050 淨零路徑</p>
+                        <i data-lucide="chevron-right" class="w-6 h-6 text-slate-400 group-hover:text-indigo-600"></i>
+                    </a>
+
+                    <a href="https://www.ndc.gov.tw/Content_List.aspx?n=733396F648BE2845" 
+                       target="_blank" class="policy-card-item group">
+                        <span class="year-indicator shadow-sm">2022</span>
+                        <p class="ml-4 font-black text-slate-800 group-hover:text-indigo-700 text-lg flex-1">12 項關鍵戰略行動計畫</p>
+                        <i data-lucide="chevron-right" class="w-6 h-6 text-slate-400 group-hover:text-indigo-600"></i>
+                    </a>
+
+                    <!-- 2021 -->
+                    <a href="https://energywhitepaper.tw/files/report_110.pdf" 
+                       target="_blank" class="policy-card-item group">
+                        <span class="year-indicator shadow-sm">2021</span>
+                        <p class="ml-4 font-black text-slate-800 group-hover:text-indigo-700 text-lg flex-1">110年度能源轉型白皮書執行報告</p>
+                        <i data-lucide="chevron-right" class="w-6 h-6 text-slate-400 group-hover:text-indigo-600"></i>
+                    </a>
+
+                    <!-- 2020 -->
+                    <a href="https://energywhitepaper.tw/pdf/1091118_energy_whitepaper.pdf" 
+                       target="_blank" class="policy-card-item group">
+                        <span class="year-indicator shadow-sm">2020</span>
+                        <p class="ml-4 font-black text-slate-800 group-hover:text-indigo-700 text-lg flex-1">能源轉型白皮書</p>
+                        <i data-lucide="chevron-right" class="w-6 h-6 text-slate-400 group-hover:text-indigo-600"></i>
+                    </a>
+
+                    <a href="https://www.moeaea.gov.tw/ECW/main/content/wHandEditorFile.ashx?file_id=5767" 
+                       target="_blank" class="policy-card-item group">
+                        <span class="year-indicator shadow-sm">2020</span>
+                        <p class="ml-4 font-black text-slate-800 group-hover:text-indigo-700 text-lg flex-1">智慧電網總體規劃方案</p>
+                        <i data-lucide="chevron-right" class="w-6 h-6 text-slate-400 group-hover:text-indigo-600"></i>
+                    </a>
+
+                    <!-- 2017 -->
+                    <a href="https://www.moeaea.gov.tw/ECW/populace/content/wHandMenuFile.ashx?file_id=1206" 
+                       target="_blank" class="policy-card-item group">
+                        <span class="year-indicator shadow-sm">2017</span>
+                        <p class="ml-4 font-black text-slate-800 group-hover:text-indigo-700 text-lg flex-1">能源發展綱領</p>
+                        <i data-lucide="chevron-right" class="w-6 h-6 text-slate-400 group-hover:text-indigo-600"></i>
+                    </a>
+                </div>
+            </section>
+
         </div>
-        
-        <iframe id="content-frame" name="content-frame" src=""></iframe>
-    </main>
+    </div>
 
     <script>
-        // 更新後的導航配置：全面更換為正式網址
-        const NAVIGATION_CONFIG = [
-            { id: 'overview', label: '總體能源概況', icon: 'layout-dashboard', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/overview.html' },
-            { id: 'key_metrics', label: '關鍵發展指標', icon: 'target', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/key_metrics.html' },
-            { id: 'demand', label: '能源需求分析', icon: 'activity', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/demand_station.html' },
-            { id: 'renewable', label: '再生能源分析', icon: 'leaf', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/renewable_station.html' },
-            { id: 'solar', label: '太陽光電專區', icon: 'sun', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/solar_station.html' },
-            { id: 'policy', label: '我國能源政策', icon: 'map', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/EnergyPolicy.html' },
-            { id: 'cost', label: '各類能源成本', icon: 'banknote', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/EnergyCost.html' },
-            { id: 'just', label: '公正轉型', icon: 'scale', url: 'https://jasw-1989.github.io/National-Energy-Policy-Reivew-Tool/justtransition.html' }
-        ];
+        const CHART_LABEL_STYLE = { fontWeight: 900, colors: '#334155', fontSize: '13px' };
 
-        const sidebar = document.getElementById('sidebar');
-        const backdrop = document.getElementById('backdrop');
-        const frame = document.getElementById('content-frame');
-        const loader = document.getElementById('page-loader');
-        const collapseIcon = document.getElementById('collapse-icon');
-        
-        let currentActive = 'overview';
-        let isCollapsed = false;
-
-        function toggleSidebar() {
-            sidebar.classList.toggle('mobile-open');
-            backdrop.classList.toggle('active');
-        }
-
-        function toggleCollapse() {
-            isCollapsed = !isCollapsed;
-            if (isCollapsed) {
-                sidebar.classList.replace('sidebar-expanded', 'sidebar-collapsed');
-                collapseIcon.setAttribute('data-lucide', 'chevron-right');
-            } else {
-                sidebar.classList.replace('sidebar-collapsed', 'sidebar-expanded');
-                collapseIcon.setAttribute('data-lucide', 'chevron-left');
-            }
-            renderNav(); 
-        }
-
-        function switchPage(id) {
-            const page = NAVIGATION_CONFIG.find(p => p.id === id);
-            if (!page) return;
-            currentActive = id;
-            
-            loader.style.opacity = '1';
-            loader.style.pointerEvents = 'auto';
-            frame.src = page.url;
-            
-            renderNav();
-
-            if (window.innerWidth <= 768) {
-                sidebar.classList.remove('mobile-open');
-                backdrop.classList.remove('active');
-            }
-        }
-
-        function renderNav() {
-            const nav = document.getElementById('master-nav');
-            nav.innerHTML = NAVIGATION_CONFIG.map(item => `
-                <div class="nav-link ${currentActive === item.id ? 'active' : ''}" 
-                     onclick="switchPage('${item.id}')" title="${item.label}">
-                    <i data-lucide="${item.icon}" class="w-5 h-5 shrink-0"></i>
-                    <span class="collapsible-text font-bold text-sm">${item.label}</span>
-                </div>
-            `).join('');
+        function initPolicyStation() {
             lucide.createIcons();
+
+            // 1. 發電結構圖 (短期)
+            const structOptions = {
+                series: [
+                    { name: '2016 基準', data: [4.8, 32.4, 45.4, 12.0] },
+                    { name: '2024 現況', data: [11.6, 42.4, 39.3, 6.7] },
+                    { name: '2026 目標', data: [20.0, 50.0, 30.0, 0.0] }
+                ],
+                chart: { type: 'bar', height: 300, toolbar: { show: false }, fontFamily: 'Inter, Noto Sans TC' },
+                colors: ['#6366f1', '#4338ca', '#10b981'], 
+                plotOptions: { bar: { columnWidth: '55%', borderRadius: 6, dataLabels: { position: 'top' } } },
+                dataLabels: { 
+                    enabled: true, 
+                    offsetY: -25,
+                    style: { fontSize: '13px', fontWeight: '900', colors: ['#0f172a'] }, 
+                    formatter: (v) => v + '%',
+                    background: { enabled: true, foreColor: '#fff', borderRadius: 4, padding: 5, opacity: 1 }
+                },
+                xaxis: { 
+                    categories: ['展綠 (再生)', '增氣 (燃氣)', '減煤 (燃煤)', '非核 (核能)'], 
+                    axisBorder: { show: false },
+                    labels: { style: CHART_LABEL_STYLE }
+                },
+                yaxis: { show: false },
+                legend: { position: 'bottom', fontWeight: 900, fontSize: '13px', labels: { colors: '#334155' } },
+                grid: { borderColor: '#e2e8f0', strokeDashArray: 4 }
+            };
+
+            // 2. 長期能源配比圖 (2024-2050)
+            const longTermOptions = {
+                series: [
+                    { name: '再生能源', data: [12, 30, 36, 65] },
+                    { name: '氫能', data: [0, 0, 0, 10] },
+                    { name: '燃氣', data: [42, 49, 54, 0] },
+                    { name: '火力+CCUS', data: [0, 0, 0, 24] },
+                    { name: '燃煤', data: [39, 20, 9, 0] },
+                    { name: '核能', data: [5, 0, 0, 0] },
+                    { name: '其他', data: [2, 1, 1, 1] }
+                ],
+                chart: { type: 'bar', height: 350, stacked: true, toolbar: { show: false }, fontFamily: 'Inter, Noto Sans TC' },
+                colors: ['#10b981', '#06b6d4', '#4338ca', '#8b5cf6', '#64748b', '#f43f5e', '#94a3b8'],
+                plotOptions: { bar: { columnWidth: '45%', borderRadius: 4 } },
+                xaxis: { 
+                    categories: ['2024', '2030', '2035', '2050目標'],
+                    labels: { style: CHART_LABEL_STYLE }
+                },
+                yaxis: { max: 100, title: { text: '百分比 (%)', style: { fontWeight: 900, color: '#334155' } }, labels: { style: CHART_LABEL_STYLE } },
+                legend: { position: 'right', fontWeight: 900, fontSize: '12px', labels: { colors: '#334155' } },
+                dataLabels: { 
+                    enabled: true, 
+                    formatter: (v) => v >= 5 ? v + '%' : '',
+                    style: { fontWeight: 900, colors: ['#fff'] }
+                },
+                tooltip: { y: { formatter: (v) => v + '%' } }
+            };
+
+            // 3. 達成率圖表
+            const gapOptions = {
+                series: [{ name: '目標達成率', data: [75.9, 59.8, 37.4] }],
+                chart: { type: 'bar', height: 400, toolbar: { show: false }, fontFamily: 'Inter, Noto Sans TC' },
+                colors: ['#4f46e5'],
+                plotOptions: { 
+                    bar: { horizontal: true, barHeight: '35%', borderRadius: 8, dataLabels: { position: 'top' } } 
+                },
+                xaxis: { 
+                    max: 100, 
+                    categories: ['太陽光電', '離岸風電', '地熱發電'], 
+                    labels: { style: CHART_LABEL_STYLE, formatter: (v) => v + '%' } 
+                },
+                yaxis: { labels: { style: { fontWeight: 900, colors: '#334155', fontSize: '15px' } } },
+                annotations: {
+                    xaxis: [{
+                        x: 100, borderColor: '#f43f5e', strokeDashArray: 4, width: 3,
+                        label: { style: { color: '#fff', background: '#f43f5e', fontWeight: 900 }, text: 'TARGET' }
+                    }]
+                },
+                dataLabels: { 
+                    enabled: true, 
+                    offsetX: 15, 
+                    textAnchor: 'start', 
+                    style: { fontSize: '18px', fontWeight: '900', colors: ['#0f172a'] }, 
+                    formatter: (v) => v + '%' 
+                },
+                grid: { borderColor: '#e2e8f0', xaxis: { lines: { show: true } }, padding: { right: 60 } }
+            };
+
+            new ApexCharts(document.querySelector("#chart-main-structure"), structOptions).render();
+            new ApexCharts(document.querySelector("#chart-long-term-structure"), longTermOptions).render();
+            new ApexCharts(document.querySelector("#chart-gap-analysis"), gapOptions).render();
+
+            setTimeout(() => {
+                const loader = document.getElementById('loader');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.display = 'none', 500);
+                }
+            }, 300);
         }
 
-        frame.addEventListener('load', () => {
-            setTimeout(() => {
-                loader.style.opacity = '0';
-                loader.style.pointerEvents = 'none';
-            }, 300);
-        });
-
-        document.addEventListener("DOMContentLoaded", () => {
-            renderNav();
-            switchPage(currentActive);
-        });
+        document.addEventListener("DOMContentLoaded", initPolicyStation);
     </script>
 </body>
 </html>
